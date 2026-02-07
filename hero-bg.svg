@@ -1,0 +1,108 @@
+<svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff8f3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0f9ff;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="strawberryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF5252;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="bananaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE66D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC93C;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="appleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF8E8E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF5555;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="600" fill="url(#bgGradient)"/>
+  
+  <!-- Floating Strawberry 1 (top left) -->
+  <g opacity="0.8">
+    <circle cx="150" cy="80" r="45" fill="url(#strawberryGrad)" filter="url(#glow)"/>
+    <polygon points="150,35 155,50 170,48 158,58 165,72 150,65 135,72 142,58 130,48 145,50" fill="#2ecc71"/>
+  </g>
+  
+  <!-- Floating Banana 1 (top right) -->
+  <g opacity="0.75">
+    <path d="M 1000 120 Q 1050 80 1080 140" stroke="url(#bananaGrad)" stroke-width="50" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+  </g>
+  
+  <!-- Popcorn (left side) -->
+  <g opacity="0.7">
+    <circle cx="80" cy="400" r="25" fill="url(#bananaGrad)" filter="url(#glow)"/>
+    <circle cx="110" cy="380" r="22" fill="#FFE66D" filter="url(#glow)"/>
+    <circle cx="130" cy="410" r="20" fill="url(#bananaGrad)" filter="url(#glow)"/>
+    <circle cx="100" cy="440" r="24" fill="#FFC93C" filter="url(#glow)"/>
+  </g>
+  
+  <!-- Watermelon slice (right side) -->
+  <g opacity="0.8">
+    <circle cx="1050" cy="450" r="50" fill="#FF6B6B" filter="url(#glow)"/>
+    <circle cx="1050" cy="450" r="40" fill="#FFE66D"/>
+    <circle cx="1030" cy="435" r="3" fill="#2ecc71"/>
+    <circle cx="1045" cy="448" r="3" fill="#2ecc71"/>
+    <circle cx="1060" cy="442" r="3" fill="#2ecc71"/>
+    <circle cx="1050" cy="465" r="3" fill="#2ecc71"/>
+    <circle cx="1070" cy="455" r="3" fill="#2ecc71"/>
+  </g>
+  
+  <!-- Orange (bottom left area) -->
+  <g opacity="0.75">
+    <circle cx="250" cy="500" r="35" fill="#FF9933" filter="url(#glow)"/>
+    <line x1="250" y1="475" x2="250" y2="525" stroke="#FFA845" stroke-width="2"/>
+    <line x1="225" y1="500" x2="275" y2="500" stroke="#FFA845" stroke-width="2"/>
+    <line x1="235" y1="490" x2="265" y2="510" stroke="#FFA845" stroke-width="2"/>
+    <line x1="235" y1="510" x2="265" y2="490" stroke="#FFA845" stroke-width="2"/>
+  </g>
+  
+  <!-- Apple (center area) -->
+  <g opacity="0.8">
+    <circle cx="600" cy="520" r="40" fill="url(#appleGrad)" filter="url(#glow)"/>
+    <polygon points="600,480 610,495 605,510" fill="#8B5A3C"/>
+    <ellipse cx="590" cy="495" rx="8" ry="12" fill="#2ecc71" opacity="0.6"/>
+  </g>
+  
+  <!-- Grapes (right bottom area) -->
+  <g opacity="0.75">
+    <circle cx="950" cy="520" r="15" fill="#9B59B6" filter="url(#glow)"/>
+    <circle cx="935" cy="510" r="13" fill="#8E44AD" filter="url(#glow)"/>
+    <circle cx="920" cy="520" r="15" fill="#9B59B6" filter="url(#glow)"/>
+    <circle cx="935" cy="535" r="14" fill="#8E44AD" filter="url(#glow)"/>
+  </g>
+  
+  <!-- Strawberry 2 (bottom center) -->
+  <g opacity="0.7">
+    <ellipse cx="450" cy="550" rx="38" ry="42" fill="url(#strawberryGrad)" filter="url(#glow)"/>
+    <polygon points="450,510 458,525 475,520 462,535 468,552 450,542 432,552 438,535 425,520 442,525" fill="#2ecc71"/>
+  </g>
+  
+  <!-- Decorative circles (floating elements) -->
+  <circle cx="350" cy="120" r="30" fill="#4ECDC4" opacity="0.15" filter="url(#glow)"/>
+  <circle cx="800" cy="200" r="35" fill="#FFE66D" opacity="0.12" filter="url(#glow)"/>
+  <circle cx="500" cy="80" r="25" fill="#FF6B6B" opacity="0.1" filter="url(#glow)"/>
+  
+  <!-- Floating sparkles -->
+  <g opacity="0.6">
+    <path d="M 200 150 L 210 160 L 200 170 L 190 160 Z" fill="#FFE66D"/>
+    <path d="M 900 100 L 905 108 L 900 116 L 895 108 Z" fill="#FF6B6B"/>
+    <path d="M 700 350 L 708 360 L 700 368 L 692 360 Z" fill="#4ECDC4"/>
+    <path d="M 400 250 L 406 258 L 400 266 L 394 258 Z" fill="#FFE66D"/>
+  </g>
+</svg>

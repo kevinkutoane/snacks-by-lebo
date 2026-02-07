@@ -1,0 +1,1322 @@
+/**
+ * SNACKS BY LEBO - Playful & Colorful Theme
+ * 
+ * A fun, vibrant design perfect for a kids' snacks brand!
+ * Features bouncy animations, bright colors, and playful elements.
+ */
+
+/* ========================================================================
+   FONT IMPORTS - Fun, rounded fonts
+   ======================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+
+/* ========================================================================
+   CSS VARIABLES - Playful Color Palette
+   ======================================================================== */
+:root {
+    /* Primary Colors - Bright & Fun */
+    --primary: #FF6B6B;           /* Coral Red */
+    --primary-light: #FF8E8E;
+    --primary-dark: #E85555;
+    
+    --secondary: #4ECDC4;         /* Turquoise */
+    --secondary-light: #7EDDD7;
+    --secondary-dark: #3DB9B1;
+    
+    --accent: #FFE66D;            /* Sunny Yellow */
+    --accent-light: #FFF0A3;
+    --accent-dark: #F5D84A;
+    
+    /* Fun Additional Colors */
+    --purple: #A78BFA;            /* Lavender */
+    --pink: #F472B6;              /* Bubblegum Pink */
+    --orange: #FB923C;            /* Tangerine */
+    --green: #34D399;             /* Mint Green */
+    --blue: #60A5FA;              /* Sky Blue */
+    
+    /* Gradients - Playful Combinations */
+    --gradient-primary: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 50%, #FFB4B4 100%);
+    --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #7EDDD7 100%);
+    --gradient-accent: linear-gradient(135deg, #FFE66D 0%, #FFF0A3 100%);
+    --gradient-rainbow: linear-gradient(135deg, #FF6B6B, #FB923C, #FFE66D, #34D399, #4ECDC4, #60A5FA, #A78BFA);
+    --gradient-candy: linear-gradient(135deg, #FF6B6B 0%, #F472B6 50%, #A78BFA 100%);
+    --gradient-sunset: linear-gradient(135deg, #FF6B6B 0%, #FB923C 50%, #FFE66D 100%);
+    --gradient-ocean: linear-gradient(135deg, #4ECDC4 0%, #60A5FA 100%);
+    
+    /* Neutral Colors */
+    --dark: #2D3436;
+    --dark-soft: #636E72;
+    --light: #FFF9F0;             /* Warm cream */
+    --white: #FFFFFF;
+    --border: #FFE4D6;
+    
+    /* Shadows - Soft & Playful */
+    --shadow-sm: 0 4px 6px rgba(255, 107, 107, 0.1);
+    --shadow-md: 0 8px 20px rgba(255, 107, 107, 0.15);
+    --shadow-lg: 0 15px 40px rgba(255, 107, 107, 0.2);
+    --shadow-xl: 0 25px 60px rgba(255, 107, 107, 0.25);
+    --shadow-glow: 0 0 30px rgba(255, 107, 107, 0.3);
+    --shadow-colored: 0 10px 30px rgba(78, 205, 196, 0.3);
+    
+    /* Typography */
+    --font-main: 'Nunito', sans-serif;
+    --font-display: 'Fredoka One', cursive;
+    
+    /* Transitions */
+    --transition-fast: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-slow: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Border Radius - Very Rounded */
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 30px;
+    --radius-xl: 40px;
+    --radius-full: 9999px;
+}
+
+/* ========================================================================
+   GLOBAL RESET & BASE STYLES
+   ======================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-main);
+    font-weight: 600;
+    line-height: 1.7;
+    color: var(--dark);
+    background: var(--light);
+    overflow-x: hidden;
+}
+
+/* Selection Color */
+::selection {
+    background: var(--accent);
+    color: var(--dark);
+}
+
+/* ========================================================================
+   ANIMATED BACKGROUND - Fun Floating Shapes
+   ======================================================================== */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(255, 107, 107, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 230, 109, 0.05) 0%, transparent 50%);
+}
+
+/* ========================================================================
+   LAYOUT UTILITIES
+   ======================================================================== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========================================================================
+   NAVIGATION BAR - Playful & Bouncy
+   ======================================================================== */
+.navbar {
+    background: var(--white);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 4px solid var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    transform: scale(1.05) rotate(-2deg);
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+}
+
+.logo-text h1 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--primary);
+    letter-spacing: 0.5px;
+    text-shadow: 2px 2px 0 var(--accent);
+}
+
+.logo-text .tagline {
+    font-size: 0.75rem;
+    color: var(--secondary);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--dark);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+    border: 3px solid transparent;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: var(--gradient-rainbow);
+    transition: var(--transition);
+    transform: translateX(-50%);
+    border-radius: 3px;
+}
+
+.nav-link:hover::before,
+.nav-link.active::before {
+    width: 80%;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+    transform: translateY(-3px);
+}
+
+.nav-link.active {
+    color: var(--primary);
+}
+
+/* Cart Button - Extra Playful */
+.cart-link {
+    background: var(--gradient-accent) !important;
+    border: 3px solid var(--accent-dark) !important;
+    border-radius: var(--radius-full) !important;
+    padding: 0.6rem 1.4rem !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+}
+
+.cart-link:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: var(--shadow-md);
+}
+
+.cart-link::before {
+    display: none !important;
+}
+
+.cart-icon {
+    font-size: 1.3rem;
+    animation: wiggle 3s ease-in-out infinite;
+}
+
+.cart-count {
+    background: var(--primary);
+    color: var(--white);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+    min-width: 22px;
+    text-align: center;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ========================================================================
+   HERO SECTION - Vibrant & Animated
+   ======================================================================== */
+.hero {
+    position: relative;
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--white) 0%, var(--light) 100%);
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+/* Animated floating shapes */
+.hero-bg::before,
+.hero-bg::after {
+    content: '🍿🍪🍫🍬🍭🧁';
+    position: absolute;
+    font-size: 4rem;
+    opacity: 0.15;
+    animation: floatAcross 25s linear infinite;
+    white-space: nowrap;
+}
+
+.hero-bg::before {
+    top: 10%;
+    left: -20%;
+    animation-delay: 0s;
+}
+
+.hero-bg::after {
+    bottom: 15%;
+    left: -20%;
+    animation-delay: -12s;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: var(--gradient-candy);
+    color: var(--white);
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    animation: shimmer 3s ease-in-out infinite;
+    box-shadow: var(--shadow-md);
+    letter-spacing: 1px;
+}
+
+.hero-content h2 {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    line-height: 1.2;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    text-shadow: 3px 3px 0 var(--accent);
+}
+
+.hero-content h2 .highlight {
+    color: var(--primary);
+    position: relative;
+    display: inline-block;
+}
+
+.hero-content h2 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: 12px;
+    background: var(--accent);
+    z-index: -1;
+    border-radius: 4px;
+    transform: rotate(-1deg);
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    color: var(--dark-soft);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hero Stats - Playful Bubbles */
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+}
+
+.stat {
+    background: var(--white);
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 4px solid var(--border);
+    transition: var(--transition);
+    min-width: 130px;
+}
+
+.stat:nth-child(1) { border-color: var(--primary); }
+.stat:nth-child(2) { border-color: var(--secondary); }
+.stat:nth-child(3) { border-color: var(--accent-dark); }
+
+.stat:hover {
+    transform: translateY(-10px) rotate(3deg);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-number {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.stat:nth-child(2) .stat-number { color: var(--secondary); }
+.stat:nth-child(3) .stat-number { color: var(--orange); }
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--dark-soft);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.3rem;
+}
+
+/* ========================================================================
+   CTA BUTTONS - Bouncy & Fun
+   ======================================================================== */
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-full);
+    font-family: var(--font-main);
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-decoration: none;
+    border: 4px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button.primary {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border-color: var(--primary-dark);
+    box-shadow: var(--shadow-md), inset 0 -4px 0 rgba(0,0,0,0.1);
+}
+
+.cta-button.primary:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: var(--shadow-lg), inset 0 -4px 0 rgba(0,0,0,0.1);
+}
+
+.cta-button.primary:active {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-sm);
+}
+
+.cta-button.secondary {
+    background: var(--white);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.cta-button.secondary:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-5px);
+}
+
+.cta-button .arrow {
+    transition: var(--transition);
+    font-size: 1.2rem;
+}
+
+.cta-button:hover .arrow {
+    transform: translateX(5px);
+}
+
+.cta-button.full {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ========================================================================
+   PRODUCTS SECTION - Fun Grid
+   ======================================================================== */
+.products-section {
+    padding: 6rem 0;
+    position: relative;
+    background: var(--white);
+}
+
+.products-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(180deg, var(--light) 0%, var(--white) 100%);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    text-shadow: 3px 3px 0 var(--accent);
+}
+
+.section-subtitle {
+    font-size: 1.15rem;
+    color: var(--dark-soft);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Product Cards - Super Playful */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    padding: 1rem;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 4px solid var(--border);
+    transition: var(--transition);
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: var(--gradient-rainbow);
+}
+
+.product-card:nth-child(1)::before { background: var(--gradient-sunset); }
+.product-card:nth-child(2)::before { background: var(--gradient-candy); }
+.product-card:nth-child(3)::before { background: var(--gradient-ocean); }
+
+.product-card:hover {
+    transform: translateY(-15px) rotate(-1deg);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary);
+}
+
+.product-image {
+    font-size: 5rem;
+    text-align: center;
+    padding: 2.5rem;
+    background: linear-gradient(180deg, var(--light) 0%, var(--white) 100%);
+    position: relative;
+}
+
+.product-image::after {
+    content: '✨';
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+.product-info {
+    padding: 1.5rem 2rem 2rem;
+}
+
+.product-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.product-description {
+    font-size: 0.95rem;
+    color: var(--dark-soft);
+    margin-bottom: 1rem;
+}
+
+.product-badge {
+    display: inline-block;
+    background: var(--gradient-accent);
+    color: var(--dark);
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    border: 2px solid var(--accent-dark);
+}
+
+.product-card:nth-child(1) .product-badge {
+    background: var(--gradient-sunset);
+    border-color: var(--orange);
+}
+
+.product-card:nth-child(2) .product-badge {
+    background: var(--gradient-candy);
+    border-color: var(--pink);
+    color: var(--white);
+}
+
+.product-card:nth-child(3) .product-badge {
+    background: var(--gradient-ocean);
+    border-color: var(--secondary);
+    color: var(--white);
+}
+
+.package-items {
+    background: var(--light);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    border: 2px dashed var(--border);
+}
+
+.package-items strong {
+    color: var(--dark);
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.package-items ul {
+    list-style: none;
+    font-size: 0.85rem;
+    color: var(--dark-soft);
+}
+
+.package-items li {
+    padding: 0.25rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.package-items li::before {
+    content: '🍬';
+    position: absolute;
+    left: 0;
+    font-size: 0.85rem;
+}
+
+.product-price {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+/* Quantity Controls */
+.product-quantity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.quantity-btn {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--secondary);
+    background: var(--white);
+    border-radius: var(--radius-full);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-btn:hover {
+    background: var(--secondary);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.quantity-input {
+    width: 60px;
+    height: 40px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    border: 3px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--dark);
+    background: var(--light);
+}
+
+/* Add to Cart Button */
+.add-to-cart-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: 4px solid var(--primary-dark);
+    border-radius: var(--radius-full);
+    font-family: var(--font-main);
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm), inset 0 -4px 0 rgba(0,0,0,0.15);
+}
+
+.add-to-cart-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md), inset 0 -4px 0 rgba(0,0,0,0.15);
+}
+
+.add-to-cart-btn:active {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ========================================================================
+   ABOUT SECTION - Colorful Feature Cards
+   ======================================================================== */
+.about-section {
+    padding: 6rem 0;
+    background: var(--light);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-section::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: var(--white);
+    transform: skewY(-3deg);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.about-card {
+    background: var(--white);
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius-xl);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    border: 4px solid var(--border);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-card:nth-child(1) { border-color: var(--green); }
+.about-card:nth-child(2) { border-color: var(--pink); }
+.about-card:nth-child(3) { border-color: var(--orange); }
+.about-card:nth-child(4) { border-color: var(--purple); }
+
+.about-card:hover {
+    transform: translateY(-10px) rotate(2deg);
+    box-shadow: var(--shadow-lg);
+}
+
+.about-card:nth-child(even):hover {
+    transform: translateY(-10px) rotate(-2deg);
+}
+
+.about-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    animation: bounce 3s ease-in-out infinite;
+}
+
+.about-card:nth-child(2) .about-icon { animation-delay: 0.5s; }
+.about-card:nth-child(3) .about-icon { animation-delay: 1s; }
+.about-card:nth-child(4) .about-icon { animation-delay: 1.5s; }
+
+.about-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--dark);
+    margin-bottom: 0.8rem;
+}
+
+.about-card p {
+    font-size: 0.95rem;
+    color: var(--dark-soft);
+    line-height: 1.6;
+}
+
+/* ========================================================================
+   CONTACT SECTION - Friendly Form
+   ======================================================================== */
+.contact-section {
+    padding: 6rem 0;
+    background: var(--white);
+    position: relative;
+}
+
+.contact-section::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: var(--light);
+    transform: skewY(3deg);
+}
+
+.contact-content {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 4rem;
+    align-items: start;
+    margin-top: 2rem;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--light);
+    border-radius: var(--radius-lg);
+    border: 3px solid var(--border);
+    transition: var(--transition);
+}
+
+.contact-item:hover {
+    transform: translateX(10px);
+    border-color: var(--secondary);
+}
+
+.contact-icon {
+    font-size: 2rem;
+    animation: wiggle 4s ease-in-out infinite;
+}
+
+.contact-item h4 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--primary);
+    margin-bottom: 0.2rem;
+}
+
+.contact-item p {
+    font-size: 0.9rem;
+    color: var(--dark-soft);
+}
+
+/* Contact Form */
+.contact-form {
+    background: var(--light);
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    border: 4px solid var(--secondary);
+    box-shadow: var(--shadow-md);
+}
+
+.contact-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark);
+    background: var(--white);
+    transition: var(--transition);
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+    color: var(--dark-soft);
+    font-weight: 500;
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* ========================================================================
+   CART MODAL - Fun Overlay
+   ======================================================================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(45, 52, 54, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border: 4px solid var(--primary);
+    box-shadow: var(--shadow-xl);
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) rotate(-5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.modal-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+}
+
+.close {
+    font-size: 2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.2);
+}
+
+.close:hover {
+    background: var(--white);
+    color: var(--primary);
+    transform: rotate(90deg);
+}
+
+.cart-items {
+    padding: 1.5rem 2rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    border: 2px solid var(--border);
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-name {
+    font-weight: 800;
+    color: var(--dark);
+    font-size: 1rem;
+}
+
+.cart-item-qty {
+    font-size: 0.85rem;
+    color: var(--dark-soft);
+}
+
+.cart-item-price {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.remove-btn {
+    background: var(--white);
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.remove-btn:hover {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--dark-soft);
+    font-size: 1.1rem;
+}
+
+.cart-summary {
+    padding: 1.5rem 2rem 2rem;
+    background: var(--light);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.cart-summary .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    color: var(--dark-soft);
+}
+
+.cart-summary .summary-row.total {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--dark);
+    padding-top: 1rem;
+    border-top: 3px dashed var(--border);
+    margin-top: 1rem;
+}
+
+.cart-summary .cta-button {
+    margin-top: 1rem;
+}
+
+/* ========================================================================
+   FOOTER - Fun & Colorful
+   ======================================================================== */
+.footer {
+    background: var(--dark);
+    color: var(--white);
+    padding: 4rem 0 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: var(--gradient-rainbow);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.footer-section h4 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+}
+
+.footer-section p {
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+    font-size: 0.95rem;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-section ul a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: var(--transition);
+    font-weight: 600;
+}
+
+.footer-section ul a:hover {
+    color: var(--accent);
+    padding-left: 5px;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-link {
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.1);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.social-link:hover {
+    background: var(--accent);
+    color: var(--dark);
+    transform: translateY(-5px) rotate(10deg);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.9rem;
+}
+
+/* ========================================================================
+   ANIMATIONS - Playful & Bouncy
+   ======================================================================== */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+@keyframes floatAcross {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100vw); }
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes shimmer {
+    0%, 100% { box-shadow: var(--shadow-md); }
+    50% { box-shadow: var(--shadow-glow); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ========================================================================
+   RESPONSIVE DESIGN
+   ======================================================================== */
+@media (max-width: 992px) {
+    .hero-content h2 {
+        font-size: 2.8rem;
+    }
+    
+    .section-title {
+        font-size: 2.2rem;
+    }
+    
+    .contact-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .hero {
+        min-height: auto;
+        padding: 4rem 0;
+    }
+    
+    .hero-content h2 {
+        font-size: 2.2rem;
+    }
+    
+    .hero-stats {
+        gap: 1rem;
+    }
+    
+    .stat {
+        min-width: 100px;
+        padding: 1rem 1.5rem;
+    }
+    
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .about-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-content {
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text h1 {
+        font-size: 1.2rem;
+    }
+    
+    .hero-content h2 {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .cta-button {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* ========================================================================
+   UTILITY CLASSES
+   ======================================================================== */
+.text-center { text-align: center; }
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.bg-light { background: var(--light); }
+.bg-white { background: var(--white); }
+.rounded { border-radius: var(--radius-lg); }
+.shadow { box-shadow: var(--shadow-md); }

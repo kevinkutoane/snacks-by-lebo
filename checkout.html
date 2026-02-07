@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+    SNACKS BY LEBO - Checkout Page
+    
+    Purpose: Complete e-commerce checkout page for order placement
+    
+    Features:
+    - Customer details form (name, email, phone)
+    - Delivery address collection
+    - Payment method selection (bank transfer, mobile money)
+    - Order summary sidebar with cart items and totals
+    - Bank account details display with copy-to-clipboard
+    - Reference number generation for order tracking
+    - Terms & conditions acceptance
+    
+    Data Flow:
+    1. User adds items to cart on index.html
+    2. Cart data saved to localStorage by script.js
+    3. User clicks "Proceed to Checkout"
+    4. checkout.html loads and retrieves cart from localStorage
+    5. User fills customer details and delivery address
+    6. User submits order
+    7. Order data saved to localStorage with reference number
+    8. Success confirmation shown
+    9. User redirected back to home page
+    
+    Integration Points:
+    - Loads cart from localStorage (set by script.js)
+    - Uses styles.css for shared styling
+    - Inline JavaScript for checkout logic
+    - Communicates back to index.html via localStorage
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Snacks by Lebo</title>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <!-- Content Security Policy - Update when adding payment gateways (Stripe, PayFast, etc.) -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: https:;
+        font-src 'self';
+        connect-src 'self';
+        frame-ancestors 'none';
+        form-action 'self';
+    ">
+    
+    <link rel="stylesheet" href="styles.css">
+    <!-- Inline styles for checkout-specific styling -->
+    <!-- All checkout styles are scoped within this <style> tag to keep them isolated -->
+    <style>
+        /* ========================================================================
+           CHECKOUT PAGE STYLES
+           
+           Layout: Two-column grid on desktop
+           - Left: Checkout form with customer details and payment
+           - Right: Order summary sidebar (sticky on desktop, static on mobile)
+           
+           Components:
+           - .checkout-container: Main container with max-width
+           - .checkout-form: Form styling and layout
+           - .order-summary: Sticky sidebar with cart totals
+           - .bank-details: Bank account information display
+           - Payment method buttons and form controls
+           ======================================================================== */
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        /* Page header with main title */
+        .checkout-header h1 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Two-column layout: form on left, summary on right */
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+        }
+
+        /* Main form container with shadow and rounded corners */
+        .checkout-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-section h2 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.9rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .order-summary {
+            background: linear-gradient(135deg, #fff8f3 0%, #f0f9ff 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .summary-items {
+            margin-bottom: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item-name {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .summary-item-qty {
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .summary-item-price {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .summary-divider {
+            height: 2px;
+            background: var(--border);
+            margin: 1.5rem 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .bank-details {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .bank-details h3 {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .bank-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .bank-detail label {
+            color: #999;
+            font-weight: 500;
+        }
+
+        .bank-detail value {
+            color: var(--dark);
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: var(--dark);
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 0.8rem;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #FFD700;
+            transform: translateY(-2px);
+        }
+
+        /* Bank Tabs */
+        .bank-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .bank-tab {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .bank-tab:hover {
+            border-color: var(--secondary);
+        }
+
+        .bank-tab.active {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+
+        .bank-tab-content {
+            display: none;
+        }
+
+        .bank-tab-content.active {
+            display: block;
+        }
+
+        /* QR Code Section */
+        .qr-payment-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .qr-payment-section h3 {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .qr-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .qr-option {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .qr-option:hover {
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .qr-option img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-placeholder {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            border-radius: 8px;
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .qr-option-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Proof of Payment Upload */
+        .pop-upload-section {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(255, 230, 109, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border: 2px dashed var(--secondary);
+        }
+
+        .pop-upload-section h3 {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .pop-upload-section p {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+        }
+
+        .file-upload-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .file-upload-btn:hover {
+            border-color: var(--secondary);
+            background: rgba(78, 205, 196, 0.05);
+        }
+
+        .file-preview {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: white;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .file-preview.active {
+            display: flex;
+        }
+
+        .file-preview-icon {
+            font-size: 1.5rem;
+        }
+
+        .file-preview-name {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--dark);
+            word-break: break-all;
+        }
+
+        .file-preview-remove {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* WhatsApp Button */
+        .whatsapp-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.8rem;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.8rem;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+        }
+
+        /* Order Confirmation Modal */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .confirmation-modal.active {
+            display: flex;
+        }
+
+        .confirmation-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .confirmation-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .confirmation-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .confirmation-body {
+            padding: 1.5rem;
+        }
+
+        .confirmation-ref {
+            background: var(--accent);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirmation-ref label {
+            font-size: 0.8rem;
+            color: #666;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .confirmation-ref strong {
+            font-size: 1.3rem;
+            color: var(--dark);
+            font-family: 'Courier New', monospace;
+        }
+
+        .confirmation-details {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .confirmation-details h4 {
+            font-size: 0.9rem;
+            color: var(--dark);
+            margin-bottom: 0.8rem;
+        }
+
+        .confirmation-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+            color: #666;
+        }
+
+        .confirmation-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .confirmation-btn {
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .confirmation-btn.primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .confirmation-btn.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .confirmation-btn.secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--border);
+        }
+
+        .confirmation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255, 107, 107, 0.05);
+            border-radius: 10px;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            margin-top: 0.3rem;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+        }
+
+        .terms-text {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .terms-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+
+        .payment-methods {
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-methods h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .method-option {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 0.8rem;
+        }
+
+        .method-option:hover {
+            border-color: var(--secondary);
+            background: rgba(78, 205, 196, 0.05);
+        }
+
+        .method-option input[type="radio"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .method-label {
+            flex: 1;
+            font-weight: 500;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        .method-icon {
+            font-size: 1.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            flex: 1;
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--border);
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            border-color: var(--secondary);
+            background: white;
+        }
+
+        .btn-pay {
+            flex: 2;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .btn-pay:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-pay:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(255, 230, 109, 0.1) 100%);
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .info-banner-icon {
+            font-size: 1.5rem;
+            min-width: 30px;
+        }
+
+        .info-banner-text {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-content {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <div class="logo-icon">🍿</div>
+                <div class="logo-text">
+                    <h1>Snacks by Lebo</h1>
+                    <p class="tagline">Where Healthy Meets Happy</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Back to Shop</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Checkout Section -->
+    <section class="checkout-container">
+        <div class="checkout-header">
+            <h1>Complete Your Order</h1>
+            <p style="color: #666; font-size: 1.1rem;">Secure payment information below</p>
+        </div>
+
+        <div class="info-banner">
+            <div class="info-banner-icon">ℹ️</div>
+            <div class="info-banner-text">
+                <strong>Payment Instructions:</strong> Please transfer the total amount to the bank details below. Include your reference number in the description. We'll confirm your order once payment is received.
+            </div>
+        </div>
+
+        <div class="checkout-content">
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <!-- Customer Details -->
+                <form id="checkoutForm" onsubmit="submitCheckout(event)" novalidate>
+                    <div class="form-section">
+                        <h2>📋 Customer Details</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" required 
+                                       autocomplete="given-name" maxlength="50" 
+                                       pattern="^[a-zA-Z\s'-]+$" title="Please enter a valid first name">
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" required 
+                                       autocomplete="family-name" maxlength="50"
+                                       pattern="^[a-zA-Z\s'-]+$" title="Please enter a valid last name">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" name="email" required 
+                                       autocomplete="email" maxlength="254">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input type="tel" id="phone" name="phone" required 
+                                       autocomplete="tel" maxlength="20"
+                                       pattern="[0-9\-\+\s\(\)]+" title="Please enter a valid phone number">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div class="form-section">
+                        <h2>🏠 Delivery Address</h2>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="address">Street Address *</label>
+                                <input type="text" id="address" name="address" required 
+                                       autocomplete="street-address" maxlength="200">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City/Town *</label>
+                                <input type="text" id="city" name="city" required 
+                                       autocomplete="address-level2" maxlength="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="postalCode">Postal Code *</label>
+                                <input type="text" id="postalCode" name="postalCode" required 
+                                       autocomplete="postal-code" maxlength="10" 
+                                       pattern="^[0-9]{4,6}$" title="Please enter a valid postal code">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="notes">Delivery Notes (Optional)</label>
+                                <textarea id="notes" name="notes" maxlength="500"
+                                          placeholder="e.g., Gate code, building number, special instructions..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-section">
+                        <h2>💳 Payment Method</h2>
+                        <div class="payment-methods">
+                            <div class="method-option">
+                                <input type="radio" id="bankTransfer" name="paymentMethod" value="bank" checked>
+                                <div class="method-icon">🏦</div>
+                                <label for="bankTransfer" class="method-label">Bank Transfer / EFT</label>
+                            </div>
+                            <div class="method-option">
+                                <input type="radio" id="instantEFT" name="paymentMethod" value="instant">
+                                <div class="method-icon">⚡</div>
+                                <label for="instantEFT" class="method-label">Instant EFT (Capitec Pay / Nedbank)</label>
+                            </div>
+                            <div class="method-option">
+                                <input type="radio" id="qrPayment" name="paymentMethod" value="qr">
+                                <div class="method-icon">📱</div>
+                                <label for="qrPayment" class="method-label">SnapScan / Zapper / Masterpass</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proof of Payment Upload -->
+                    <div class="pop-upload-section">
+                        <h3>📎 Upload Proof of Payment (Optional)</h3>
+                        <p>Already paid? Upload your POP to speed up order processing.</p>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="popUpload" name="popUpload" class="file-upload-input" 
+                                   accept="image/*,.pdf" onchange="handleFileUpload(this)">
+                            <div class="file-upload-btn">
+                                <span>📤</span>
+                                <span>Choose file or drag & drop</span>
+                            </div>
+                        </div>
+                        <div class="file-preview" id="filePreview">
+                            <span class="file-preview-icon">📄</span>
+                            <span class="file-preview-name" id="fileName"></span>
+                            <button type="button" class="file-preview-remove" onclick="removeFile()">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="termsCheck" name="termsCheck" required>
+                        <label for="termsCheck" style="margin: 0; cursor: pointer;">
+                            <div class="terms-text">
+                                I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>. I understand that payment must be transferred to the provided bank account and my order will be confirmed upon receipt of payment.
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button type="button" class="btn-back" onclick="window.location.href='index.html'">← Continue Shopping</button>
+                        <button type="submit" class="btn-pay">Complete Order 🎉</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Summary Sidebar -->
+            <div class="order-summary">
+                <div class="summary-title">📦 Order Summary</div>
+                
+                <div class="summary-items" id="summaryItems">
+                    <!-- Items will be populated here -->
+                </div>
+
+                <div class="summary-divider"></div>
+                
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>R<span id="summarySubtotal">0.00</span></span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span>R<span id="summaryDelivery">50.00</span></span>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-total">
+                    <span>Total Amount:</span>
+                    <span>R<span id="summaryTotal">0.00</span></span>
+                </div>
+
+                <!-- Bank Details -->
+                <div class="bank-details">
+                    <h3>🏦 Bank Account Details</h3>
+                    
+                    <!-- Bank Selection Tabs -->
+                    <div class="bank-tabs">
+                        <button type="button" class="bank-tab active" onclick="switchBank('fnb')">
+                            <span>🟢</span> FNB
+                        </button>
+                        <button type="button" class="bank-tab" onclick="switchBank('capitec')">
+                            <span>🔵</span> Capitec
+                        </button>
+                        <button type="button" class="bank-tab" onclick="switchBank('standard')">
+                            <span>🔴</span> Standard
+                        </button>
+                        <button type="button" class="bank-tab" onclick="switchBank('nedbank')">
+                            <span>🟢</span> Nedbank
+                        </button>
+                    </div>
+
+                    <!-- FNB Details -->
+                    <div id="fnb-details" class="bank-tab-content active">
+                        <div class="bank-detail">
+                            <label>Account Holder:</label>
+                            <value>Lebo Snacks (Pty) Ltd</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Bank:</label>
+                            <value>First National Bank</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Type:</label>
+                            <value>Business Cheque</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Number:</label>
+                            <value>62234567890</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Branch Code:</label>
+                            <value>250655</value>
+                        </div>
+                    </div>
+
+                    <!-- Capitec Details -->
+                    <div id="capitec-details" class="bank-tab-content">
+                        <div class="bank-detail">
+                            <label>Account Holder:</label>
+                            <value>Lebo Snacks (Pty) Ltd</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Bank:</label>
+                            <value>Capitec Bank</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Type:</label>
+                            <value>Business Account</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Number:</label>
+                            <value>1234567891</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Branch Code:</label>
+                            <value>470010</value>
+                        </div>
+                    </div>
+
+                    <!-- Standard Bank Details -->
+                    <div id="standard-details" class="bank-tab-content">
+                        <div class="bank-detail">
+                            <label>Account Holder:</label>
+                            <value>Lebo Snacks (Pty) Ltd</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Bank:</label>
+                            <value>Standard Bank</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Type:</label>
+                            <value>Business Current</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Number:</label>
+                            <value>001234567</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Branch Code:</label>
+                            <value>051001</value>
+                        </div>
+                    </div>
+
+                    <!-- Nedbank Details -->
+                    <div id="nedbank-details" class="bank-tab-content">
+                        <div class="bank-detail">
+                            <label>Account Holder:</label>
+                            <value>Lebo Snacks (Pty) Ltd</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Bank:</label>
+                            <value>Nedbank</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Type:</label>
+                            <value>Business Account</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Account Number:</label>
+                            <value>1987654321</value>
+                        </div>
+                        <div class="bank-detail">
+                            <label>Branch Code:</label>
+                            <value>198765</value>
+                        </div>
+                    </div>
+
+                    <!-- Reference (common for all banks) -->
+                    <div class="bank-detail" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <label>Reference:</label>
+                        <value id="refNumber">LEBO-2026-00001</value>
+                    </div>
+                    
+                    <button type="button" class="copy-btn" onclick="copyBankDetails()">📋 Copy Bank Details</button>
+                    <button type="button" class="whatsapp-btn" onclick="sendWhatsApp()">
+                        <span>💬</span> Send Order via WhatsApp
+                    </button>
+                </div>
+
+                <!-- QR Code Payment Options -->
+                <div class="qr-payment-section">
+                    <h3>📱 Scan to Pay</h3>
+                    <div class="qr-options">
+                        <div class="qr-option" onclick="showQRModal('snapscan')">
+                            <div class="qr-placeholder">📸</div>
+                            <div class="qr-option-label">SnapScan</div>
+                        </div>
+                        <div class="qr-option" onclick="showQRModal('zapper')">
+                            <div class="qr-placeholder">⚡</div>
+                            <div class="qr-option-label">Zapper</div>
+                        </div>
+                        <div class="qr-option" onclick="showQRModal('masterpass')">
+                            <div class="qr-placeholder">💳</div>
+                            <div class="qr-option-label">Masterpass</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #999; text-align: center; margin-top: 1rem;">
+                        Use reference: <strong id="qrRef">LEBO-2026-00001</strong>
+                    </p>
+                </div>
+
+                <!-- Additional Info -->
+                <div style="background: rgba(255, 107, 107, 0.05); padding: 1rem; border-radius: 10px; font-size: 0.85rem; color: #666; line-height: 1.5;">
+                    <strong style="color: var(--primary);">⏱️ Order Confirmation:</strong><br>
+                    Your order will be confirmed within 2 hours of payment. You'll receive an SMS and email confirmation.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Confirmation Modal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="confirmation-content">
+            <div class="confirmation-header">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+                <h2>Order Submitted!</h2>
+                <p>Thank you for your order</p>
+            </div>
+            <div class="confirmation-body">
+                <div class="confirmation-ref">
+                    <label>Your Reference Number</label>
+                    <strong id="confirmRef">LEBO-2026-00001</strong>
+                </div>
+                
+                <div class="confirmation-details">
+                    <h4>📦 Order Summary</h4>
+                    <div id="confirmItems"></div>
+                    <div style="border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.5rem;">
+                        <div class="confirmation-detail-row">
+                            <span>Subtotal:</span>
+                            <span>R<span id="confirmSubtotal">0.00</span></span>
+                        </div>
+                        <div class="confirmation-detail-row">
+                            <span>Delivery:</span>
+                            <span>R50.00</span>
+                        </div>
+                        <div class="confirmation-detail-row" style="font-weight: 700; color: var(--dark);">
+                            <span>Total:</span>
+                            <span>R<span id="confirmTotal">0.00</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="confirmation-details">
+                    <h4>🏦 Payment Details</h4>
+                    <div class="confirmation-detail-row">
+                        <span>Bank:</span>
+                        <span id="confirmBank">First National Bank</span>
+                    </div>
+                    <div class="confirmation-detail-row">
+                        <span>Account:</span>
+                        <span id="confirmAccount">62234567890</span>
+                    </div>
+                    <div class="confirmation-detail-row">
+                        <span>Branch:</span>
+                        <span id="confirmBranch">250655</span>
+                    </div>
+                    <div class="confirmation-detail-row" style="font-weight: 700;">
+                        <span>Reference:</span>
+                        <span id="confirmBankRef">LEBO-2026-00001</span>
+                    </div>
+                </div>
+
+                <div class="confirmation-actions">
+                    <button type="button" class="confirmation-btn whatsapp" onclick="sendWhatsAppConfirmation()">
+                        💬 Share via WhatsApp
+                    </button>
+                    <button type="button" class="confirmation-btn primary" onclick="copyOrderDetails()">
+                        📋 Copy Order Details
+                    </button>
+                    <button type="button" class="confirmation-btn secondary" onclick="closeConfirmation()">
+                        🏠 Return to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="confirmation-modal">
+        <div class="confirmation-content" style="max-width: 350px;">
+            <div class="confirmation-header" style="background: var(--secondary-gradient);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;" id="qrModalIcon">📱</div>
+                <h2 id="qrModalTitle">Scan to Pay</h2>
+            </div>
+            <div class="confirmation-body" style="text-align: center;">
+                <div style="background: white; padding: 2rem; border-radius: 12px; border: 2px solid var(--border); margin-bottom: 1rem;">
+                    <div style="width: 150px; height: 150px; background: linear-gradient(45deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); margin: 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 3rem;">📷</span>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.85rem; color: #666;">
+                        QR Code Placeholder<br>
+                        <small>Add your merchant QR code here</small>
+                    </p>
+                </div>
+                <div class="confirmation-ref">
+                    <label>Use Reference:</label>
+                    <strong id="qrModalRef">LEBO-2026-00001</strong>
+                </div>
+                <div class="confirmation-ref" style="background: var(--light); margin-top: 0.5rem;">
+                    <label>Amount:</label>
+                    <strong id="qrModalAmount">R0.00</strong>
+                </div>
+                <button type="button" class="confirmation-btn secondary" style="margin-top: 1rem;" onclick="closeQRModal()">
+                    ✕ Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" style="margin-top: 4rem;">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Snacks by Lebo</h4>
+                    <p>Handcrafted snacks made with love for healthy kids everywhere.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>hello@snacksbylebo.com<br>(555) 123-4567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Snacks by Lebo. Made with ❤️ for healthy kids</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * CHECKOUT PAGE JAVASCRIPT
+         * 
+         * This script manages the checkout page functionality including:
+         * - Loading cart data from localStorage
+         * - Displaying order summary with items and totals
+         * - Generating unique reference numbers for orders
+         * - Handling checkout form submission
+         * - Saving complete order to localStorage
+         * - Copying bank details to clipboard
+         * 
+         * SECURITY NOTES FOR PAYMENT GATEWAY INTEGRATION:
+         * ================================================
+         * 1. NEVER trust client-side totals - always recalculate server-side
+         * 2. Use payment gateway's hosted checkout page (PCI DSS compliance)
+         * 3. Implement webhook verification for payment confirmations
+         * 4. Add CSRF tokens to all forms
+         * 5. Use HTTPS only in production
+         * 6. Implement idempotency keys for payment requests
+         * 7. Store minimal card data (use tokenization)
+         * 8. Log all payment attempts for audit trail
+         */
+
+        // ====================================================================
+        // SECURITY UTILITIES
+        // ====================================================================
+
+        /**
+         * Product catalog - source of truth for prices.
+         * In production, this should come from the server.
+         */
+        const PRODUCTS = [
+            { id: 1, name: "Starter Snack Pack", price: 250 },
+            { id: 2, name: "Family Favorites Pack", price: 450 },
+            { id: 3, name: "Ultimate Deluxe Pack", price: 600 }
+        ];
+
+        const DELIVERY_FEE = 50;
+
+        /**
+         * Sanitizes a string to prevent XSS attacks.
+         */
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        /**
+         * Validates quantity is a positive integer within bounds.
+         */
+        function validateQuantity(value, max = 100) {
+            const num = parseInt(value, 10);
+            if (isNaN(num) || num < 1) return 1;
+            if (num > max) return max;
+            return num;
+        }
+
+        /**
+         * Generates a cryptographically stronger reference number.
+         */
+        function generateSecureReference() {
+            const timestamp = Date.now().toString(36).toUpperCase();
+            let random;
+            if (window.crypto && window.crypto.getRandomValues) {
+                const array = new Uint32Array(1);
+                window.crypto.getRandomValues(array);
+                random = array[0].toString(36).toUpperCase().slice(0, 5);
+            } else {
+                random = Math.random().toString(36).toUpperCase().slice(2, 7);
+            }
+            return `LEBO-${timestamp}-${random}`;
+        }
+
+        // ====================================================================
+        // CART AND ORDER DATA MANAGEMENT
+        // ====================================================================
+
+        /**
+         * Loads and validates cart data from browser localStorage.
+         * Validates items against product catalog to prevent price tampering.
+         * 
+         * @returns {Array} Validated cart array
+         */
+        function loadCart() {
+            try {
+                const saved = localStorage.getItem('snacksCart');
+                if (!saved) return [];
+                
+                const parsed = JSON.parse(saved);
+                if (!Array.isArray(parsed)) return [];
+                
+                // Validate each item against catalog
+                return parsed.filter(item => {
+                    if (typeof item.id !== 'number') return false;
+                    const catalogProduct = PRODUCTS.find(p => p.id === item.id);
+                    if (!catalogProduct) return false;
+                    
+                    // Use catalog price (never trust stored price)
+                    item.price = catalogProduct.price;
+                    item.name = catalogProduct.name;
+                    item.quantity = validateQuantity(item.quantity, 100);
+                    return true;
+                });
+            } catch (e) {
+                console.warn('Error loading cart:', e);
+                return [];
+            }
+        }
+
+        // ====================================================================
+        // ORDER SUMMARY DISPLAY
+        // ====================================================================
+
+        /**
+         * Populates the order summary sidebar with validated cart items and totals.
+         * Prices are always calculated from the catalog, never from stored values.
+         */
+        function populateOrderSummary() {
+            const cart = loadCart();
+            const summaryItems = document.getElementById('summaryItems');
+            const summarySubtotal = document.getElementById('summarySubtotal');
+            const summaryTotal = document.getElementById('summaryTotal');
+
+            if (cart.length === 0) {
+                summaryItems.innerHTML = '<div style="color: #999; text-align: center; padding: 1rem;">Your cart is empty</div>';
+                summarySubtotal.textContent = '0.00';
+                summaryTotal.textContent = '0.00';
+                return;
+            }
+
+            let subtotal = 0;
+            summaryItems.innerHTML = cart.map(item => {
+                // Use catalog price for calculation
+                const catalogProduct = PRODUCTS.find(p => p.id === item.id);
+                const safePrice = catalogProduct ? catalogProduct.price : 0;
+                const safeQuantity = validateQuantity(item.quantity, 100);
+                const itemTotal = safePrice * safeQuantity;
+                subtotal += itemTotal;
+                
+                return `
+                    <div class="summary-item">
+                        <div>
+                            <div class="summary-item-name">${sanitizeHTML(item.name)}</div>
+                            <div class="summary-item-qty">x${safeQuantity}</div>
+                        </div>
+                        <div class="summary-item-price">R${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            summarySubtotal.textContent = subtotal.toFixed(2);
+            summaryTotal.textContent = (subtotal + DELIVERY_FEE).toFixed(2);
+        }
+
+        // ====================================================================
+        // CLIPBOARD AND BANKING UTILITIES
+        // ====================================================================
+
+        /**
+         * Copies bank account details to the user's clipboard.
+         * Uses modern Clipboard API with fallback.
+         */
+        function copyBankDetails() {
+            const details = `
+Snacks by Lebo Bank Details
+Account Holder: Lebo Snacks (Pty) Ltd
+Bank: First National Bank
+Account Number: 62234567890
+Branch Code: 250456
+Reference: ${document.getElementById('refNumber').textContent}
+            `.trim();
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(details).then(() => {
+                    alert('✅ Bank details copied to clipboard!');
+                }).catch(() => {
+                    fallbackCopy(details);
+                });
+            } else {
+                fallbackCopy(details);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ Bank details copied to clipboard!');
+            } catch (e) {
+                alert('Unable to copy. Please copy manually.');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ====================================================================
+        // CHECKOUT FORM SUBMISSION
+        // ====================================================================
+
+        /**
+         * Handles complete checkout form submission with validation.
+         * 
+         * SECURITY NOTES:
+         * - All totals are recalculated from catalog prices
+         * - Input validation is performed
+         * - When API is available, order is submitted to backend
+         * - Server recalculates all totals and validates before processing
+         */
+        async function submitCheckout(event) {
+            event.preventDefault();
+            
+            const cart = loadCart();
+            const form = event.target;
+            
+            // Validation: Terms must be accepted
+            if (!document.getElementById('termsCheck').checked) {
+                alert('⚠️ Please accept the terms and conditions to proceed.');
+                return;
+            }
+
+            // Validation: Cart cannot be empty
+            if (cart.length === 0) {
+                alert('⚠️ Your cart is empty! Please add items before checkout.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Get and validate form data
+            const formData = new FormData(form);
+            const customerData = {
+                firstName: formData.get('firstName')?.trim() || '',
+                lastName: formData.get('lastName')?.trim() || '',
+                email: formData.get('email')?.trim() || '',
+                phone: formData.get('phone')?.trim() || '',
+                address: formData.get('address')?.trim() || '',
+                city: formData.get('city')?.trim() || '',
+                postalCode: formData.get('postalCode')?.trim() || '',
+                province: formData.get('province')?.trim() || 'Gauteng',
+                notes: formData.get('notes')?.trim() || '',
+                paymentMethod: formData.get('paymentMethod') || 'bank'
+            };
+
+            // Validate required fields
+            const required = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'postalCode'];
+            for (const field of required) {
+                if (!customerData[field]) {
+                    alert(`⚠️ Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`);
+                    return;
+                }
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(customerData.email)) {
+                alert('⚠️ Please enter a valid email address.');
+                return;
+            }
+
+            // SECURITY: Recalculate totals from catalog prices (never trust client)
+            let subtotal = 0;
+            const validatedItems = cart.map(item => {
+                const catalogProduct = PRODUCTS.find(p => p.id === item.id);
+                if (!catalogProduct) return null;
+                
+                const safeQuantity = validateQuantity(item.quantity, 100);
+                const itemTotal = catalogProduct.price * safeQuantity;
+                subtotal += itemTotal;
+                
+                return {
+                    id: item.id,
+                    name: catalogProduct.name,
+                    price: catalogProduct.price,
+                    quantity: safeQuantity,
+                    total: itemTotal
+                };
+            }).filter(Boolean);
+
+            const total = subtotal + DELIVERY_FEE;
+            const refNumber = document.getElementById('refNumber').textContent;
+
+            // Create order object for storage/API
+            const order = {
+                customer: customerData,
+                items: validatedItems,
+                subtotal: subtotal,
+                delivery: DELIVERY_FEE,
+                total: total,
+                reference: refNumber,
+                timestamp: new Date().toISOString(),
+                status: 'pending_payment'
+            };
+
+            // Try to submit to API if available
+            if (typeof SnacksAPI !== 'undefined') {
+                try {
+                    const isAvailable = await SnacksAPI.isAvailable();
+                    if (isAvailable) {
+                        console.log('📤 Submitting order to API...');
+                        
+                        // Map to API format
+                        const paymentMethodMap = {
+                            'bank': 'bank_transfer',
+                            'mobile': 'mobile_money',
+                            'card': 'card'
+                        };
+                        
+                        const apiOrderData = {
+                            customerDetails: {
+                                firstName: customerData.firstName,
+                                lastName: customerData.lastName,
+                                email: customerData.email,
+                                phone: customerData.phone
+                            },
+                            deliveryAddress: {
+                                street: customerData.address,
+                                city: customerData.city,
+                                province: customerData.province || 'Gauteng',
+                                postalCode: customerData.postalCode
+                            },
+                            items: validatedItems.map(item => ({
+                                productId: item.id,
+                                quantity: item.quantity
+                            })),
+                            paymentMethod: paymentMethodMap[customerData.paymentMethod] || 'bank_transfer',
+                            notes: customerData.notes
+                        };
+                        
+                        const apiOrder = await SnacksAPI.orders.create(apiOrderData);
+                        console.log('✅ Order created via API:', apiOrder.referenceNumber);
+                        
+                        // Update order with API response
+                        order.reference = apiOrder.referenceNumber;
+                        order.apiOrderId = apiOrder.id;
+                        document.getElementById('refNumber').textContent = apiOrder.referenceNumber;
+                    }
+                } catch (apiError) {
+                    console.warn('⚠️ API submission failed, using local order:', apiError.message);
+                    // Continue with local order storage
+                }
+            }
+
+            // Save order to localStorage (for demo/fallback purposes)
+            localStorage.setItem('lastOrder', JSON.stringify(order));
+
+            // Store order for confirmation modal
+            window.currentOrder = order;
+
+            // Show confirmation modal instead of alert
+            showConfirmationModal(order);
+
+            // Clear cart
+            localStorage.removeItem('snacksCart');
+        }
+
+        // ====================================================================
+        // BANK SWITCHING
+        // ====================================================================
+
+        const BANK_DETAILS = {
+            fnb: {
+                name: 'First National Bank',
+                account: '62234567890',
+                branch: '250655',
+                type: 'Business Cheque'
+            },
+            capitec: {
+                name: 'Capitec Bank',
+                account: '1234567891',
+                branch: '470010',
+                type: 'Business Account'
+            },
+            standard: {
+                name: 'Standard Bank',
+                account: '001234567',
+                branch: '051001',
+                type: 'Business Current'
+            },
+            nedbank: {
+                name: 'Nedbank',
+                account: '1987654321',
+                branch: '198765',
+                type: 'Business Account'
+            }
+        };
+
+        let currentBank = 'fnb';
+
+        function switchBank(bankId) {
+            currentBank = bankId;
+            
+            // Update tabs
+            document.querySelectorAll('.bank-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.bank-tab').classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.bank-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${bankId}-details`).classList.add('active');
+        }
+
+        function copyBankDetails() {
+            const bank = BANK_DETAILS[currentBank];
+            const ref = document.getElementById('refNumber').textContent;
+            const total = document.getElementById('summaryTotal').textContent;
+            
+            const details = `
+🍿 SNACKS BY LEBO - Payment Details
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 Amount: R${total}
+
+🏦 Bank: ${bank.name}
+👤 Account Holder: Lebo Snacks (Pty) Ltd
+📋 Account Type: ${bank.type}
+🔢 Account Number: ${bank.account}
+🏛️ Branch Code: ${bank.branch}
+
+📎 Reference: ${ref}
+
+⚠️ IMPORTANT: Use the reference number exactly as shown!
+            `.trim();
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(details).then(() => {
+                    showToast('✅ Bank details copied!');
+                }).catch(() => fallbackCopy(details));
+            } else {
+                fallbackCopy(details);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ Bank details copied!');
+            } catch (e) {
+                alert('Unable to copy. Please copy manually.');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+                background: #333; color: white; padding: 1rem 2rem; border-radius: 10px;
+                font-weight: 600; z-index: 9999; animation: slideUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ====================================================================
+        // WHATSAPP INTEGRATION
+        // ====================================================================
+
+        const WHATSAPP_NUMBER = '27123456789'; // Replace with actual number
+
+        function sendWhatsApp() {
+            const cart = loadCart();
+            const ref = document.getElementById('refNumber').textContent;
+            const total = document.getElementById('summaryTotal').textContent;
+            const bank = BANK_DETAILS[currentBank];
+            
+            const itemsList = cart.map(item => `• ${item.quantity}x ${item.name} - R${(item.price * item.quantity).toFixed(2)}`).join('\n');
+            
+            const message = `
+🍿 *SNACKS BY LEBO - New Order*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📎 *Reference:* ${ref}
+
+📦 *Order Items:*
+${itemsList}
+
+💰 *Total:* R${total}
+
+🏦 *Paying via:* ${bank.name}
+
+I will transfer the payment now. Please confirm when received.
+
+Thank you! 🙏
+            `.trim();
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+        }
+
+        function sendWhatsAppConfirmation() {
+            const order = window.currentOrder || JSON.parse(localStorage.getItem('lastOrder') || '{}');
+            if (!order.reference) return;
+            
+            const bank = BANK_DETAILS[currentBank];
+            const itemsList = order.items?.map(item => `• ${item.quantity}x ${item.name}`).join('\n') || '';
+            
+            const message = `
+🍿 *SNACKS BY LEBO - Order Confirmation*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📎 *Reference:* ${order.reference}
+
+👤 *Customer:* ${order.customer?.firstName} ${order.customer?.lastName}
+📱 *Phone:* ${order.customer?.phone}
+📧 *Email:* ${order.customer?.email}
+
+📍 *Delivery Address:*
+${order.customer?.address}
+${order.customer?.city}, ${order.customer?.postalCode}
+
+📦 *Items:*
+${itemsList}
+
+💰 *Total:* R${order.total?.toFixed(2)}
+
+🏦 *Payment Details:*
+Bank: ${bank.name}
+Account: ${bank.account}
+Branch: ${bank.branch}
+Reference: ${order.reference}
+
+Please confirm once payment is received! 🙏
+            `.trim();
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+        }
+
+        // ====================================================================
+        // QR CODE MODALS
+        // ====================================================================
+
+        function showQRModal(type) {
+            const modal = document.getElementById('qrModal');
+            const title = document.getElementById('qrModalTitle');
+            const icon = document.getElementById('qrModalIcon');
+            const ref = document.getElementById('refNumber').textContent;
+            const total = document.getElementById('summaryTotal').textContent;
+            
+            document.getElementById('qrModalRef').textContent = ref;
+            document.getElementById('qrModalAmount').textContent = `R${total}`;
+            
+            const titles = {
+                snapscan: { title: 'SnapScan', icon: '📸' },
+                zapper: { title: 'Zapper', icon: '⚡' },
+                masterpass: { title: 'Masterpass', icon: '💳' }
+            };
+            
+            title.textContent = titles[type]?.title || 'Scan to Pay';
+            icon.textContent = titles[type]?.icon || '📱';
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ====================================================================
+        // CONFIRMATION MODAL
+        // ====================================================================
+
+        function showConfirmationModal(order) {
+            const modal = document.getElementById('confirmationModal');
+            const bank = BANK_DETAILS[currentBank];
+            
+            // Populate confirmation details
+            document.getElementById('confirmRef').textContent = order.reference;
+            document.getElementById('confirmBankRef').textContent = order.reference;
+            document.getElementById('confirmSubtotal').textContent = order.subtotal.toFixed(2);
+            document.getElementById('confirmTotal').textContent = order.total.toFixed(2);
+            document.getElementById('confirmBank').textContent = bank.name;
+            document.getElementById('confirmAccount').textContent = bank.account;
+            document.getElementById('confirmBranch').textContent = bank.branch;
+            
+            // Populate items
+            const itemsHtml = order.items.map(item => `
+                <div class="confirmation-detail-row">
+                    <span>${item.quantity}x ${sanitizeHTML(item.name)}</span>
+                    <span>R${item.total.toFixed(2)}</span>
+                </div>
+            `).join('');
+            document.getElementById('confirmItems').innerHTML = itemsHtml;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConfirmation() {
+            document.getElementById('confirmationModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            window.location.href = 'index.html';
+        }
+
+        function copyOrderDetails() {
+            const order = window.currentOrder || JSON.parse(localStorage.getItem('lastOrder') || '{}');
+            const bank = BANK_DETAILS[currentBank];
+            
+            const itemsList = order.items?.map(item => `• ${item.quantity}x ${item.name} - R${item.total.toFixed(2)}`).join('\n') || '';
+            
+            const details = `
+🍿 SNACKS BY LEBO - Order Confirmation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📎 Reference: ${order.reference}
+📅 Date: ${new Date(order.timestamp).toLocaleDateString('en-ZA')}
+
+📦 ORDER ITEMS:
+${itemsList}
+
+💰 Subtotal: R${order.subtotal?.toFixed(2)}
+🚚 Delivery: R${order.delivery?.toFixed(2)}
+━━━━━━━━━━━━━━━━━
+💵 TOTAL: R${order.total?.toFixed(2)}
+
+🏦 PAYMENT DETAILS:
+Bank: ${bank.name}
+Account Holder: Lebo Snacks (Pty) Ltd
+Account: ${bank.account}
+Branch: ${bank.branch}
+Reference: ${order.reference}
+
+📍 DELIVERY ADDRESS:
+${order.customer?.firstName} ${order.customer?.lastName}
+${order.customer?.address}
+${order.customer?.city}, ${order.customer?.postalCode}
+Phone: ${order.customer?.phone}
+
+⚠️ Use reference "${order.reference}" in your payment!
+            `.trim();
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(details).then(() => {
+                    showToast('✅ Order details copied!');
+                }).catch(() => fallbackCopy(details));
+            } else {
+                fallbackCopy(details);
+            }
+        }
+
+        // ====================================================================
+        // FILE UPLOAD (PROOF OF PAYMENT)
+        // ====================================================================
+
+        let uploadedFile = null;
+
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+            if (!validTypes.includes(file.type)) {
+                alert('⚠️ Please upload an image (JPG, PNG, GIF) or PDF file.');
+                input.value = '';
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('⚠️ File size must be less than 5MB.');
+                input.value = '';
+                return;
+            }
+            
+            uploadedFile = file;
+            
+            // Show preview
+            const preview = document.getElementById('filePreview');
+            const fileName = document.getElementById('fileName');
+            
+            fileName.textContent = file.name;
+            preview.classList.add('active');
+            
+            showToast('✅ File uploaded successfully!');
+        }
+
+        function removeFile() {
+            uploadedFile = null;
+            document.getElementById('popUpload').value = '';
+            document.getElementById('filePreview').classList.remove('active');
+        }
+
+        // ====================================================================
+        // PAGE INITIALIZATION
+        // ====================================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ref = generateSecureReference();
+            
+            // Set reference number in all places
+            document.getElementById('refNumber').textContent = ref;
+            document.getElementById('qrRef').textContent = ref;
+            
+            populateOrderSummary();
+            
+            // Redirect if cart is empty
+            const cart = loadCart();
+            if (cart.length === 0) {
+                const confirmReturn = confirm('Your cart is empty. Return to shop?');
+                if (confirmReturn) {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeQRModal();
+                closeConfirmation();
+            }
+        });
+
+        // Close modals on backdrop click
+        document.querySelectorAll('.confirmation-modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
+    <!-- API Client for backend integration -->
+    <script src="api-client.js"></script>
+</body>
+</html>
