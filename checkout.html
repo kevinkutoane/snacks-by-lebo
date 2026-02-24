@@ -72,6 +72,7 @@
            - .bank-details: Bank account information display
            - Payment method buttons and form controls
            ======================================================================== */
+        .checkout-container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
@@ -1009,16 +1010,16 @@
                     
                     <!-- Bank Selection Tabs -->
                     <div class="bank-tabs">
-                        <button type="button" class="bank-tab active" onclick="switchBank('fnb')">
+                        <button type="button" class="bank-tab active" onclick="switchBank('fnb', event)">
                             <span>🟢</span> FNB
                         </button>
-                        <button type="button" class="bank-tab" onclick="switchBank('capitec')">
+                        <button type="button" class="bank-tab" onclick="switchBank('capitec', event)">
                             <span>🔵</span> Capitec
                         </button>
-                        <button type="button" class="bank-tab" onclick="switchBank('standard')">
+                        <button type="button" class="bank-tab" onclick="switchBank('standard', event)">
                             <span>🔴</span> Standard
                         </button>
-                        <button type="button" class="bank-tab" onclick="switchBank('nedbank')">
+                        <button type="button" class="bank-tab" onclick="switchBank('nedbank', event)">
                             <span>🟢</span> Nedbank
                         </button>
                     </div>
@@ -1289,6 +1290,8 @@
         </div>
     </footer>
 
+    <!-- API Client for backend integration -->
+    <script src="api-client.js"></script>
     <script>
         /**
          * CHECKOUT PAGE JAVASCRIPT
@@ -1319,9 +1322,9 @@
 
         /**
          * Product catalog - source of truth for prices.
-         * In production, this should come from the server.
+         * Updated from API when backend is available.
          */
-        const PRODUCTS = [
+        let PRODUCTS = [
             { id: 1, name: "Starter Snack Pack", price: 250 },
             { id: 2, name: "Family Favorites Pack", price: 450 },
             { id: 3, name: "Ultimate Deluxe Pack", price: 600 }
@@ -1385,7 +1388,7 @@
                 
                 // Validate each item against catalog
                 return parsed.filter(item => {
-                    if (typeof item.id !== 'number') return false;
+                    if (!item.id) return false;
                     const catalogProduct = PRODUCTS.find(p => p.id === item.id);
                     if (!catalogProduct) return false;
                     
@@ -1450,46 +1453,7 @@
         // CLIPBOARD AND BANKING UTILITIES
         // ====================================================================
 
-        /**
-         * Copies bank account details to the user's clipboard.
-         * Uses modern Clipboard API with fallback.
-         */
-        function copyBankDetails() {
-            const details = `
-Snacks by Lebo Bank Details
-Account Holder: Lebo Snacks (Pty) Ltd
-Bank: First National Bank
-Account Number: 62234567890
-Branch Code: 250456
-Reference: ${document.getElementById('refNumber').textContent}
-            `.trim();
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(details).then(() => {
-                    alert('✅ Bank details copied to clipboard!');
-                }).catch(() => {
-                    fallbackCopy(details);
-                });
-            } else {
-                fallbackCopy(details);
-            }
-        }
-
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                alert('✅ Bank details copied to clipboard!');
-            } catch (e) {
-                alert('Unable to copy. Please copy manually.');
-            }
-            document.body.removeChild(textarea);
-        }
+        // (copyBankDetails and fallbackCopy defined in bank switching section below)
 
         // ====================================================================
         // CHECKOUT FORM SUBMISSION
@@ -1683,7 +1647,7 @@ Reference: ${document.getElementById('refNumber').textContent}
 
         let currentBank = 'fnb';
 
-        function switchBank(bankId) {
+        function switchBank(bankId, event) {
             currentBank = bankId;
             
             // Update tabs
@@ -1990,7 +1954,24 @@ Phone: ${order.customer?.phone}
         // PAGE INITIALIZATION
         // ====================================================================
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Try to load products from API for accurate pricing
+            if (typeof SnacksAPI !== 'undefined') {
+                try {
+                    const isAvailable = await SnacksAPI.isAvailable();
+                    if (isAvailable) {
+                        const apiProducts = await SnacksAPI.products.getAll();
+                        PRODUCTS = apiProducts.map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            price: p.price / 100
+                        }));
+                    }
+                } catch (e) {
+                    console.warn('API not available, using local catalog');
+                }
+            }
+
             const ref = generateSecureReference();
             
             // Set reference number in all places
@@ -2027,7 +2008,5 @@ Phone: ${order.customer?.phone}
             });
         });
     </script>
-    <!-- API Client for backend integration -->
-    <script src="api-client.js"></script>
 </body>
 </html>

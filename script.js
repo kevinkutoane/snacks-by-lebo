@@ -628,7 +628,7 @@ function loadCartFromStorage() {
             // Validate and sanitize each item
             cart = parsed.filter(item => {
                 // Check required fields
-                if (typeof item.id !== 'number' || typeof item.quantity !== 'number') {
+                if (!item.id || typeof item.quantity !== 'number') {
                     return false;
                 }
                 // Check item exists in catalog
