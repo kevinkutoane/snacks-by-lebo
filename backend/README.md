@@ -119,17 +119,20 @@ npm start
 ## 📡 API Endpoints
 
 ### Health Check
+
 ```
 GET /api/v1/health
 ```
 
 ### Products
+
 ```
 GET  /api/v1/products          # List all products
 GET  /api/v1/products/:id      # Get product by ID
 ```
 
 ### Orders
+
 ```
 POST   /api/v1/orders                      # Create order
 GET    /api/v1/orders                      # List orders (admin)
