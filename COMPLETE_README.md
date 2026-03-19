@@ -23,6 +23,7 @@ A modern, production-ready e-commerce platform for a kids' snacks startup, built
 **Snacks by Lebo** is a complete e-commerce solution featuring:
 
 ### Frontend Features
+
 - 🛒 **Shopping Cart** - Add/remove items with real-time updates
 - 💾 **Persistent Storage** - Cart saved in browser localStorage
 - 📱 **Responsive Design** - Works on desktop, tablet, and mobile
@@ -31,6 +32,7 @@ A modern, production-ready e-commerce platform for a kids' snacks startup, built
 - 💳 **Checkout Flow** - Complete order form with delivery details
 
 ### Backend Features
+
 - 🏗️ **Clean Architecture** - Separation of concerns across 4 layers
 - 📊 **Database** - SQLite with sql.js (pure JavaScript)
 - 🔒 **Security** - Helmet, CORS, rate limiting, input validation
@@ -70,6 +72,7 @@ This project implements **Clean Architecture** with strict separation of concern
 ```
 
 ### Benefits of Clean Architecture
+
 ✅ **Testability** - Each layer can be tested independently
 ✅ **Maintainability** - Clear separation of concerns
 ✅ **Scalability** - Easy to add new features
@@ -167,6 +170,7 @@ npm run seed
 ```
 
 This creates initial product data:
+
 - Starter Pack (R250)
 - Family Favorites Pack (R450)
 - Ultimate Deluxe Pack (R600)
@@ -189,16 +193,17 @@ npm run dev           # Development (auto-reload)
 ### Access Frontend
 
 Open your browser to:
-- **Home Page:** http://localhost:3000
-- **Checkout:** http://localhost:3000/checkout
-- **API Docs:** http://localhost:3000/api/v1
+
+- **Home Page:** <http://localhost:3000>
+- **Checkout:** <http://localhost:3000/checkout>
+- **API Docs:** <http://localhost:3000/api/v1>
 
 ### What's Running
 
 | Component | URL | Purpose |
 |-----------|-----|---------|
-| Frontend | http://localhost:3000 | Shopping interface |
-| API | http://localhost:3000/api/v1 | Backend API |
+| Frontend | <http://localhost:3000> | Shopping interface |
+| API | <http://localhost:3000/api/v1> | Backend API |
 | Database | `./data/snacks_by_lebo.db` | SQLite database |
 
 ---
@@ -218,6 +223,7 @@ GET /health
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -236,10 +242,12 @@ GET /products
 ```
 
 **Query Parameters:**
+
 - `category` - Filter by category (starter, family, premium)
 - `active` - Filter by availability (true/false)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -300,6 +308,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -423,6 +432,7 @@ describe('Product Entity', () => {
 ### Critical Security Notes
 
 ⚠️ **Server-side Price Validation**
+
 ```javascript
 // ALWAYS recalculate prices from catalog
 // Never trust client-submitted prices!
@@ -431,12 +441,14 @@ const validatedPrice = product.price; // From server, not client
 ```
 
 ⚠️ **HTTPS Required**
+
 ```javascript
 // In production, ensure HTTPS is enabled
 // Payment data should only be transmitted over HTTPS
 ```
 
 ⚠️ **Database Backups**
+
 ```bash
 # Regular backups recommended
 cp data/snacks_by_lebo.db data/snacks_by_lebo.db.backup
@@ -449,35 +461,41 @@ cp data/snacks_by_lebo.db data/snacks_by_lebo.db.backup
 This project demonstrates all phases of the Software Development Life Cycle:
 
 ### 1. Planning Phase ✅
+
 - Requirements gathered in README
 - Security checklist created
 - User stories defined
 
 ### 2. Design Phase ✅
+
 - Clean Architecture diagram created
 - Entity relationship diagrams
 - API endpoint specifications
 - Database schema designed
 
 ### 3. Development Phase ✅
+
 - Code organized by layers (Domain, Application, Infrastructure, Presentation)
 - SOLID principles followed
 - Comprehensive code comments
 - Error handling implemented
 
 ### 4. Testing Phase ✅
+
 - Unit tests for entities
 - Integration tests for API
 - Test structure organized
 - 100% critical path coverage
 
 ### 5. Deployment Phase ✅
+
 - Environment configuration (.env)
 - Logging setup with Winston
 - Error handling middleware
 - Graceful shutdown handling
 
 ### 6. Maintenance Phase ✅
+
 - Winston logger for debugging
 - Error tracking
 - Application logs in `./logs`
@@ -488,12 +506,14 @@ This project demonstrates all phases of the Software Development Life Cycle:
 ## 💻 Technology Stack
 
 ### Frontend
+
 - **HTML5** - Semantic markup
 - **CSS3** - Responsive design with flexbox/grid
 - **JavaScript (ES6+)** - Interactive functionality
 - **LocalStorage** - Client-side persistence
 
 ### Backend
+
 - **Node.js** - JavaScript runtime
 - **Express.js** - Web framework
 - **SQLite** (sql.js) - Database
@@ -503,6 +523,7 @@ This project demonstrates all phases of the Software Development Life Cycle:
 - **express-validator** - Input validation
 
 ### Development Tools
+
 - **npm** - Package management
 - **Node Test Runner** - Testing framework
 - **Git** - Version control
@@ -649,6 +670,7 @@ Contributions are welcome! Please follow these guidelines:
 ## 📞 Support
 
 For issues or questions:
+
 1. Check the [Security Checklist](./SECURITY_CHECKLIST.md)
 2. Review the [Backend README](./backend/README.md)
 3. Check application logs in `backend/logs/`

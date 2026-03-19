@@ -1,12 +1,13 @@
 /**
- * =============================================================================
- * SNACKS BY LEBO - CODE DOCUMENTATION & COMMENTS GUIDE
- * =============================================================================
- * 
- * This document explains all the critical code sections with comprehensive
- * inline comments. For actual implementation, see the source files.
- * 
- * =============================================================================
+
+* =============================================================================
+* SNACKS BY LEBO - CODE DOCUMENTATION & COMMENTS GUIDE
+* =============================================================================
+*
+* This document explains all the critical code sections with comprehensive
+* inline comments. For actual implementation, see the source files.
+*
+* =============================================================================
  */
 
 // =============================================================================
@@ -14,33 +15,34 @@
 // =============================================================================
 
 /**
- * Clean Architecture is organized in concentric layers:
- * 
- * Outermost Layer (Infrastructure):
- *   - Database connections
- *   - Repository implementations
- *   - Logging systems
- *   - External services
- * 
- * Third Layer (Presentation):
- *   - HTTP controllers
- *   - Routes
- *   - Middleware
- *   - Input validators
- * 
- * Second Layer (Application):
- *   - Use cases
- *   - Orchestration logic
- *   - Business process flows
- * 
- * Innermost Layer (Domain):
- *   - Entities
- *   - Value objects
- *   - Business rules
- *   - Repository interfaces
- * 
- * Key Benefit: Each layer only depends on layers inside it.
- * Never depends on outer layers.
+
+* Clean Architecture is organized in concentric layers:
+*
+* Outermost Layer (Infrastructure):
+* * Database connections
+* * Repository implementations
+* * Logging systems
+* * External services
+*
+* Third Layer (Presentation):
+* * HTTP controllers
+* * Routes
+* * Middleware
+* * Input validators
+*
+* Second Layer (Application):
+* * Use cases
+* * Orchestration logic
+* * Business process flows
+*
+* Innermost Layer (Domain):
+* * Entities
+* * Value objects
+* * Business rules
+* * Repository interfaces
+*
+* Key Benefit: Each layer only depends on layers inside it.
+* Never depends on outer layers.
  */
 
 // =============================================================================
@@ -49,19 +51,19 @@
 
 class Product {
     /**
-     * Create a new Product
-     * 
-     * @param {Object} props - Product properties
+     *Create a new Product
+     *
+     *@param {Object} props - Product properties
      * @param {string} props.id - UUID identifier
-     * @param {string} props.name - Product name (2+ chars)
+     *@param {string} props.name - Product name (2+ chars)
      * @param {string} props.description - Product description
-     * @param {number} props.price - Price in CENTS (e.g., 25000 = R250.00)
+     *@param {number} props.price - Price in CENTS (e.g., 25000 = R250.00)
      *                               This avoids floating-point errors
-     * @param {string} props.category - Category: 'starter', 'family', 'premium'
+     *@param {string} props.category - Category: 'starter', 'family', 'premium'
      * @param {string} props.emoji - Display emoji (e.g., '🎁')
-     * @param {string} props.badge - Marketing badge (e.g., 'Best for Trying')
+     *@param {string} props.badge - Marketing badge (e.g., 'Best for Trying')
      * @param {string[]} props.items - List of included items
-     * @param {boolean} props.isActive - Whether product is available for purchase
+     *@param {boolean} props.isActive - Whether product is available for purchase
      */
     constructor({
         id,
@@ -186,21 +188,21 @@ class Product {
 
 class Order {
     /**
-     * Create a new Order
-     * 
-     * Order Status Flow (State Machine):
+     *Create a new Order
+     *
+     *Order Status Flow (State Machine):
      *   pending → confirmed → processing → shipped → delivered
-     *        ↓
+     *↓
      *     cancelled (from any state)
-     *        ↓
+     *↓
      *     refunded (from any state)
-     * 
+     *
      * Payment Status Flow:
-     *   pending → paid
+     *pending → paid
      *         ↓
-     *       failed
+     *failed
      *         ↓
-     *      refunded
+     *refunded
      */
     constructor({
         id = null,
@@ -436,15 +438,15 @@ class Order {
 
 class CreateOrderUseCase {
     /**
-     * Create Order Use Case
-     * 
-     * This is where CRITICAL security validation happens!
-     * 
-     * Never trust prices submitted by the client.
+     *Create Order Use Case
+     *
+     *This is where CRITICAL security validation happens!
+     *
+     *Never trust prices submitted by the client.
      * Always recalculate from server database.
-     * 
+     *
      * @param {IOrderRepository} orderRepository
-     * @param {IProductRepository} productRepository
+     *@param {IProductRepository} productRepository
      */
     constructor(orderRepository, productRepository) {
         this.orderRepository = orderRepository;
@@ -570,18 +572,19 @@ class CreateOrderUseCase {
 // =============================================================================
 
 /**
- * Initialize SQLite database using sql.js
- * 
- * Why sql.js?
- * - Pure JavaScript implementation
- * - No native bindings required
- * - Works cross-platform
- * - Fast enough for small/medium databases
- * 
- * Database file: ./data/snacks_by_lebo.db
- * 
- * @param {string} databasePath - Path to database file
- * @returns {Promise<Database>} SQLite database instance
+
+* Initialize SQLite database using sql.js
+*
+* Why sql.js?
+* * Pure JavaScript implementation
+* * No native bindings required
+* * Works cross-platform
+* * Fast enough for small/medium databases
+*
+* Database file: ./data/snacks_by_lebo.db
+*
+* @param {string} databasePath - Path to database file
+* @returns {Promise<Database>} SQLite database instance
  */
 async function initDatabase(databasePath) {
     // Ensure data directory exists
@@ -615,7 +618,8 @@ async function initDatabase(databasePath) {
 }
 
 /**
- * Create database tables if they don't exist
+
+* Create database tables if they don't exist
  */
 function createTables(db) {
     // Products table schema
@@ -633,7 +637,7 @@ function createTables(db) {
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
-        
+
         CREATE INDEX IF NOT EXISTS idx_products_category
             ON products(category);
         CREATE INDEX IF NOT EXISTS idx_products_is_active
@@ -658,7 +662,7 @@ function createTables(db) {
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
-        
+
         CREATE INDEX IF NOT EXISTS idx_orders_reference_number
             ON orders(reference_number);
         CREATE INDEX IF NOT EXISTS idx_orders_status
@@ -669,10 +673,11 @@ function createTables(db) {
 }
 
 /**
- * Save database to disk
- * 
- * This is needed because sql.js runs in memory.
- * We periodically serialize it to disk for persistence.
+
+* Save database to disk
+*
+* This is needed because sql.js runs in memory.
+* We periodically serialize it to disk for persistence.
  */
 function saveDatabase(db, databasePath) {
     const data = db.export();
@@ -685,11 +690,12 @@ function saveDatabase(db, databasePath) {
 // =============================================================================
 
 /**
- * Product Controller
- * 
- * Handles HTTP requests related to products.
- * Calls use cases to get business logic results.
- * Formats responses for API clients.
+
+* Product Controller
+*
+* Handles HTTP requests related to products.
+* Calls use cases to get business logic results.
+* Formats responses for API clients.
  */
 class ProductController {
     constructor() {
@@ -697,17 +703,17 @@ class ProductController {
     }
 
     /**
-     * GET /api/v1/products
-     * 
-     * Get all products with optional filtering
-     * 
-     * Query Parameters:
-     * - category: Filter by 'starter', 'family', or 'premium'
-     * - active: Filter by availability (true/false)
-     * 
-     * @param {Request} req - Express request
-     * @param {Response} res - Express response
-     * @param {Function} next - Express next middleware
+  * GET /api/v1/products
+  *
+  * Get all products with optional filtering
+  *
+  * Query Parameters:
+  * * category: Filter by 'starter', 'family', or 'premium'
+  * * active: Filter by availability (true/false)
+  *
+  * @param {Request} req - Express request
+  * @param {Response} res - Express response
+  * @param {Function} next - Express next middleware
      */
     async getAll(req, res, next) {
         try {
@@ -736,13 +742,13 @@ class ProductController {
     }
 
     /**
-     * GET /api/v1/products/:id
-     * 
-     * Get single product by ID
-     * 
-     * @param {Request} req - Express request
-     * @param {Response} res - Express response
-     * @param {Function} next - Express next middleware
+  * GET /api/v1/products/:id
+  *
+  * Get single product by ID
+  *
+  * @param {Request} req - Express request
+  * @param {Response} res - Express response
+  * @param {Function} next - Express next middleware
      */
     async getById(req, res, next) {
         try {
@@ -771,16 +777,17 @@ class ProductController {
 // =============================================================================
 
 /**
- * Custom API Error class
- * 
- * Standardizes error responses across the API
- * Distinguishes operational errors from programming errors
+
+* Custom API Error class
+*
+* Standardizes error responses across the API
+* Distinguishes operational errors from programming errors
  */
 class ApiError extends Error {
     /**
-     * @param {number} statusCode - HTTP status code
-     * @param {string} message - Error message
-     * @param {Object} details - Optional error details
+  * @param {number} statusCode - HTTP status code
+  * @param {string} message - Error message
+  * @param {Object} details - Optional error details
      */
     constructor(statusCode, message, details = null) {
         super(message);
@@ -816,15 +823,16 @@ class ApiError extends Error {
 }
 
 /**
- * Global error handler middleware
- * 
- * Express middleware signature: (err, req, res, next)
- * 
- * Process:
- * 1. Log error for debugging
- * 2. Check if it's an operational error
- * 3. Format response based on error type
- * 4. Send consistent error response
+
+* Global error handler middleware
+*
+* Express middleware signature: (err, req, res, next)
+*
+* Process:
+* 1. Log error for debugging
+* 1. Check if it's an operational error
+* 1. Format response based on error type
+* 1. Send consistent error response
  */
 const errorHandler = (err, req, res, next) => {
     // Log error for debugging
@@ -865,26 +873,30 @@ const errorHandler = (err, req, res, next) => {
 // =============================================================================
 
 /**
- * SnacksAPI - Frontend API Client
- * 
- * This is an IIFE (Immediately Invoked Function Expression)
- * that creates a global SnacksAPI object.
- * 
- * Usage:
- * ```javascript
- * // Get all products
- * const products = await SnacksAPI.products.getAll();
- * 
- * // Create order
- * const order = await SnacksAPI.orders.create({
- *     customerDetails: {...},
- *     items: [...],
- *     ...
- * });
- * 
- * // Check API availability
- * const isAvailable = await SnacksAPI.isAvailable();
- * ```
+
+* SnacksAPI - Frontend API Client
+*
+* This is an IIFE (Immediately Invoked Function Expression)
+* that creates a global SnacksAPI object.
+*
+* Usage:
+
+* ```javascript
+* // Get all products
+* const products = await SnacksAPI.products.getAll();
+*
+* // Create order
+* const order = await SnacksAPI.orders.create({
+*     customerDetails: {...},
+*     items: [...],
+*     ...
+* });
+*
+* // Check API availability
+* const isAvailable = await SnacksAPI.isAvailable();
+
+* ```
+
  */
 const SnacksAPI = (function() {
     'use strict';
@@ -1053,20 +1065,21 @@ const SnacksAPI = (function() {
 // =============================================================================
 
 /**
- * Rate limiting configuration
- * 
- * Why rate limiting?
- * - Prevent DDoS attacks
- * - Prevent abuse (e.g., spam orders)
- * - Fair resource sharing
- * 
- * Configuration:
- * - General: 100 requests per 15 minutes per IP
- * - Orders: 5 orders per minute per IP
+
+* Rate limiting configuration
+*
+* Why rate limiting?
+* * Prevent DDoS attacks
+* * Prevent abuse (e.g., spam orders)
+* * Fair resource sharing
+*
+* Configuration:
+* * General: 100 requests per 15 minutes per IP
+* * Orders: 5 orders per minute per IP
  */
 
 const generalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 *60* 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP'
 });

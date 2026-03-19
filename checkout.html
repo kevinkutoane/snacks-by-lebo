@@ -292,7 +292,7 @@
         }
 
         .copy-btn:hover {
-            background: #FFD700;
+            background: var(--accent-dark);
             transform: translateY(-2px);
         }
 
@@ -556,7 +556,7 @@
         }
 
         .confirmation-header {
-            background: var(--primary-gradient);
+            background: var(--gradient-primary);
             color: white;
             padding: 2rem;
             text-align: center;
@@ -635,7 +635,7 @@
         }
 
         .confirmation-btn.primary {
-            background: var(--primary-gradient);
+            background: var(--gradient-primary);
             color: white;
         }
 
@@ -716,6 +716,12 @@
             background: rgba(78, 205, 196, 0.05);
         }
 
+        .method-option:has(input:checked) {
+            border-color: var(--secondary);
+            background: rgba(78, 205, 196, 0.07);
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15);
+        }
+
         .method-option input[type="radio"] {
             cursor: pointer;
             width: 18px;
@@ -757,7 +763,7 @@
 
         .btn-pay {
             flex: 2;
-            background: var(--primary-gradient);
+            background: var(--gradient-primary);
             color: white;
             border: none;
             padding: 1rem;
@@ -924,17 +930,17 @@
                         <h2>💳 Payment Method</h2>
                         <div class="payment-methods">
                             <div class="method-option">
-                                <input type="radio" id="bankTransfer" name="paymentMethod" value="bank" checked>
+                                <input type="radio" id="bankTransfer" name="paymentMethod" value="bank" checked onchange="updatePaymentView()">
                                 <div class="method-icon">🏦</div>
                                 <label for="bankTransfer" class="method-label">Bank Transfer / EFT</label>
                             </div>
                             <div class="method-option">
-                                <input type="radio" id="instantEFT" name="paymentMethod" value="instant">
+                                <input type="radio" id="instantEFT" name="paymentMethod" value="instant" onchange="updatePaymentView()">
                                 <div class="method-icon">⚡</div>
                                 <label for="instantEFT" class="method-label">Instant EFT (Capitec Pay / Nedbank)</label>
                             </div>
                             <div class="method-option">
-                                <input type="radio" id="qrPayment" name="paymentMethod" value="qr">
+                                <input type="radio" id="qrPayment" name="paymentMethod" value="qr" onchange="updatePaymentView()">
                                 <div class="method-icon">📱</div>
                                 <label for="qrPayment" class="method-label">SnapScan / Zapper / Masterpass</label>
                             </div>
@@ -948,10 +954,10 @@
                         <div class="file-upload-wrapper">
                             <input type="file" id="popUpload" name="popUpload" class="file-upload-input" 
                                    accept="image/*,.pdf" onchange="handleFileUpload(this)">
-                            <div class="file-upload-btn">
+                            <label for="popUpload" class="file-upload-btn">
                                 <span>📤</span>
                                 <span>Choose file or drag & drop</span>
-                            </div>
+                            </label>
                         </div>
                         <div class="file-preview" id="filePreview">
                             <span class="file-preview-icon">📄</span>
@@ -1010,16 +1016,16 @@
                     
                     <!-- Bank Selection Tabs -->
                     <div class="bank-tabs">
-                        <button type="button" class="bank-tab active" onclick="switchBank('fnb', event)">
+                        <button type="button" class="bank-tab active" data-bank="fnb" onclick="switchBank('fnb', event)">
                             <span>🟢</span> FNB
                         </button>
-                        <button type="button" class="bank-tab" onclick="switchBank('capitec', event)">
+                        <button type="button" class="bank-tab" data-bank="capitec" onclick="switchBank('capitec', event)">
                             <span>🔵</span> Capitec
                         </button>
-                        <button type="button" class="bank-tab" onclick="switchBank('standard', event)">
+                        <button type="button" class="bank-tab" data-bank="standard" onclick="switchBank('standard', event)">
                             <span>🔴</span> Standard
                         </button>
-                        <button type="button" class="bank-tab" onclick="switchBank('nedbank', event)">
+                        <button type="button" class="bank-tab" data-bank="nedbank" onclick="switchBank('nedbank', event)">
                             <span>🟢</span> Nedbank
                         </button>
                     </div>
@@ -1133,7 +1139,7 @@
                 </div>
 
                 <!-- QR Code Payment Options -->
-                <div class="qr-payment-section">
+                <div class="qr-payment-section" style="display:none">
                     <h3>📱 Scan to Pay</h3>
                     <div class="qr-options">
                         <div class="qr-option" onclick="showQRModal('snapscan')">
@@ -1234,7 +1240,7 @@
     <!-- QR Code Modal -->
     <div id="qrModal" class="confirmation-modal">
         <div class="confirmation-content" style="max-width: 350px;">
-            <div class="confirmation-header" style="background: var(--secondary-gradient);">
+            <div class="confirmation-header" style="background: var(--gradient-secondary);">
                 <div style="font-size: 2.5rem; margin-bottom: 0.5rem;" id="qrModalIcon">📱</div>
                 <h2 id="qrModalTitle">Scan to Pay</h2>
             </div>
@@ -1562,6 +1568,8 @@
                         // Map to API format
                         const paymentMethodMap = {
                             'bank': 'bank_transfer',
+                            'instant': 'bank_transfer',
+                            'qr': 'mobile_money',
                             'mobile': 'mobile_money',
                             'card': 'card'
                         };
@@ -1647,16 +1655,58 @@
 
         let currentBank = 'fnb';
 
+        function switchBankById(bankId) {
+            currentBank = bankId;
+            document.querySelectorAll('.bank-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.bank === bankId);
+            });
+            document.querySelectorAll('.bank-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${bankId}-details`).classList.add('active');
+        }
+
         function switchBank(bankId, event) {
             currentBank = bankId;
             
             // Update tabs
             document.querySelectorAll('.bank-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.closest('.bank-tab').classList.add('active');
+            event.currentTarget.classList.add('active');
             
             // Update content
             document.querySelectorAll('.bank-tab-content').forEach(content => content.classList.remove('active'));
             document.getElementById(`${bankId}-details`).classList.add('active');
+        }
+
+        function updatePaymentView() {
+            const selected = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'bank';
+            const bankDetails = document.querySelector('.bank-details');
+            const qrSection = document.querySelector('.qr-payment-section');
+            const fnbTab = document.querySelector('.bank-tab[data-bank="fnb"]');
+            const standardTab = document.querySelector('.bank-tab[data-bank="standard"]');
+            const capitecTab = document.querySelector('.bank-tab[data-bank="capitec"]');
+            const nedbankTab = document.querySelector('.bank-tab[data-bank="nedbank"]');
+
+            if (selected === 'qr') {
+                bankDetails.style.display = 'none';
+                qrSection.style.display = 'block';
+            } else {
+                bankDetails.style.display = 'block';
+                qrSection.style.display = 'none';
+
+                if (selected === 'instant') {
+                    fnbTab.style.display = 'none';
+                    standardTab.style.display = 'none';
+                    capitecTab.style.display = '';
+                    nedbankTab.style.display = '';
+                    if (currentBank === 'fnb' || currentBank === 'standard') {
+                        switchBankById('capitec');
+                    }
+                } else {
+                    fnbTab.style.display = '';
+                    standardTab.style.display = '';
+                    capitecTab.style.display = '';
+                    nedbankTab.style.display = '';
+                }
+            }
         }
 
         function copyBankDetails() {
@@ -1758,7 +1808,11 @@ Thank you! 🙏
             const order = window.currentOrder || JSON.parse(localStorage.getItem('lastOrder') || '{}');
             if (!order.reference) return;
             
+            const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'bank';
             const bank = BANK_DETAILS[currentBank];
+            const paymentInfo = selectedPayment === 'qr'
+                ? 'Method: QR Payment (SnapScan / Zapper / Masterpass)'
+                : `Bank: ${bank.name}\nAccount: ${bank.account}\nBranch: ${bank.branch}`;
             const itemsList = order.items?.map(item => `• ${item.quantity}x ${item.name}`).join('\n') || '';
             
             const message = `
@@ -1781,9 +1835,7 @@ ${itemsList}
 💰 *Total:* R${order.total?.toFixed(2)}
 
 🏦 *Payment Details:*
-Bank: ${bank.name}
-Account: ${bank.account}
-Branch: ${bank.branch}
+${paymentInfo}
 Reference: ${order.reference}
 
 Please confirm once payment is received! 🙏
@@ -1831,16 +1883,24 @@ Please confirm once payment is received! 🙏
 
         function showConfirmationModal(order) {
             const modal = document.getElementById('confirmationModal');
-            const bank = BANK_DETAILS[currentBank];
+            const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'bank';
             
             // Populate confirmation details
             document.getElementById('confirmRef').textContent = order.reference;
             document.getElementById('confirmBankRef').textContent = order.reference;
             document.getElementById('confirmSubtotal').textContent = order.subtotal.toFixed(2);
             document.getElementById('confirmTotal').textContent = order.total.toFixed(2);
-            document.getElementById('confirmBank').textContent = bank.name;
-            document.getElementById('confirmAccount').textContent = bank.account;
-            document.getElementById('confirmBranch').textContent = bank.branch;
+
+            if (selectedPayment === 'qr') {
+                document.getElementById('confirmBank').textContent = 'QR Payment (SnapScan / Zapper / Masterpass)';
+                document.getElementById('confirmAccount').textContent = '—';
+                document.getElementById('confirmBranch').textContent = '—';
+            } else {
+                const bank = BANK_DETAILS[currentBank];
+                document.getElementById('confirmBank').textContent = bank.name;
+                document.getElementById('confirmAccount').textContent = bank.account;
+                document.getElementById('confirmBranch').textContent = bank.branch;
+            }
             
             // Populate items
             const itemsHtml = order.items.map(item => `
@@ -1979,7 +2039,13 @@ Phone: ${order.customer?.phone}
             document.getElementById('qrRef').textContent = ref;
             
             populateOrderSummary();
-            
+
+            // Wire payment method changes to update sidebar view
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.addEventListener('change', updatePaymentView);
+            });
+            updatePaymentView();
+
             // Redirect if cart is empty
             const cart = loadCart();
             if (cart.length === 0) {

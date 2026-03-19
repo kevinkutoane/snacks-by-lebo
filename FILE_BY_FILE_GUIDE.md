@@ -7,9 +7,11 @@ This document provides detailed explanations of every important file in the Snac
 ## 📁 Root Directory Files
 
 ### `COMPLETE_README.md`
+
 **Type:** Documentation  
 **Purpose:** Main project documentation with setup instructions, architecture overview, and API documentation  
 **Key Sections:**
+
 - Project overview and features
 - Architecture diagram
 - Project structure
@@ -22,9 +24,11 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `COMPREHENSIVE_CODE_GUIDE.md`
+
 **Type:** Documentation  
 **Purpose:** Detailed inline code comments explaining every critical section with real code examples  
 **Key Topics:**
+
 - Architecture overview with visual diagram
 - Domain layer explanation (Product, Order entities)
 - Application layer (use cases)
@@ -36,6 +40,7 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `README.md`
+
 **Type:** Documentation  
 **Purpose:** Original project README with basic overview  
 **Content:** Project introduction and basic setup
@@ -43,9 +48,11 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `SECURITY_CHECKLIST.md`
+
 **Type:** Documentation  
 **Purpose:** Production security guidelines and best practices  
 **Covers:**
+
 - XSS prevention
 - CSRF protection
 - SQL injection prevention
@@ -58,9 +65,11 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `styles.css`
+
 **Type:** Frontend Styling  
 **Purpose:** Complete CSS styling for the e-commerce interface  
 **Features:**
+
 - Responsive design (mobile, tablet, desktop)
 - Product card styling
 - Shopping cart styling
@@ -70,6 +79,7 @@ This document provides detailed explanations of every important file in the Snac
 - Typography
 
 **Key Classes:**
+
 - `.product-card` - Individual product display
 - `.cart-container` - Shopping cart section
 - `.checkout-form` - Checkout page layout
@@ -79,9 +89,11 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `script.js`
+
 **Type:** Frontend JavaScript  
 **Purpose:** Main frontend application logic  
 **Key Functions:**
+
 - `initializeProducts()` - Load products from API or local catalog
 - `addToCart(productId, quantity)` - Add item to cart
 - `removeFromCart(productId)` - Remove item from cart
@@ -90,6 +102,7 @@ This document provides detailed explanations of every important file in the Snac
 - `loadCartFromStorage()` - Load cart from localStorage
 
 **Features:**
+
 - Real-time cart updates
 - localStorage persistence
 - API integration with fallback
@@ -98,15 +111,18 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `index.html`
+
 **Type:** Frontend HTML  
 **Purpose:** Main shopping page  
 **Sections:**
+
 - Navigation header
 - Product showcase grid
 - Shopping cart sidebar
 - Footer with contact info
 
 **API Integration:**
+
 - Loads `api-client.js` for API communication
 - Calls `initializeProducts()` on page load
 - Displays products from API or local catalog
@@ -114,9 +130,11 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `checkout.html`
+
 **Type:** Frontend HTML  
 **Purpose:** Checkout and order submission page  
 **Form Fields:**
+
 - Customer details (name, email, phone)
 - Delivery address (street, city, province, postal code)
 - Order items review
@@ -124,6 +142,7 @@ This document provides detailed explanations of every important file in the Snac
 - Special instructions textarea
 
 **Functionality:**
+
 - `submitCheckout()` - Async function to submit order to API
 - Order validation before submission
 - Reference number display after order creation
@@ -132,11 +151,13 @@ This document provides detailed explanations of every important file in the Snac
 ---
 
 ### `api-client.js`
+
 **Type:** Frontend API Client  
 **Purpose:** Centralized API communication layer  
 **Global Object:** `SnacksAPI`
 
 **Methods:**
+
 ```javascript
 // Products
 await SnacksAPI.products.getAll(options)
@@ -154,6 +175,7 @@ SnacksAPI.setBaseUrl(url)
 ```
 
 **Features:**
+
 - Promise-based async/await syntax
 - Automatic error handling
 - Request timeout (10 seconds)
@@ -165,11 +187,13 @@ SnacksAPI.setBaseUrl(url)
 ## 🔙 Backend Files
 
 ### `backend/src/index.js`
+
 **Type:** Application Entry Point  
 **Architecture Layer:** Presentation  
 **Purpose:** Initialize and start the Express.js server
 
 **Key Responsibilities:**
+
 1. **Environment Setup**
    - Load environment variables from `.env`
    - Set configuration (PORT, NODE_ENV, CORS_ORIGIN)
@@ -203,6 +227,7 @@ SnacksAPI.setBaseUrl(url)
    - Close database on shutdown
 
 **Dependencies:**
+
 - express
 - dotenv
 - helmet
@@ -215,11 +240,13 @@ SnacksAPI.setBaseUrl(url)
 ---
 
 ### `backend/src/domain/entities/Product.js`
+
 **Type:** Entity (Business Object)  
 **Architecture Layer:** Domain (Innermost)  
 **Purpose:** Represent a product with business logic and validation
 
 **Properties:**
+
 - `id` - UUID identifier
 - `name` - Product name (2+ chars)
 - `description` - Product description
@@ -233,12 +260,14 @@ SnacksAPI.setBaseUrl(url)
 - `updatedAt` - Last update timestamp
 
 **Methods:**
+
 - `validate()` - Validate product data against business rules
 - `formatPrice()` - Convert cents to display format (R250.00)
 - `isAvailable()` - Check if product can be purchased
 - `toJSON()` - Serialize to JSON for API response
 
 **Business Rules:**
+
 1. Name must be 2+ characters
 2. Price must be positive
 3. Category must be valid
@@ -247,11 +276,13 @@ SnacksAPI.setBaseUrl(url)
 ---
 
 ### `backend/src/domain/entities/Order.js`
+
 **Type:** Entity (Business Object)  
 **Architecture Layer:** Domain  
 **Purpose:** Represent an order with full state machine and business logic
 
 **Properties:**
+
 - `id` - UUID identifier
 - `referenceNumber` - Unique reference (LEBO-ABC123-XYZ)
 - `customerDetails` - Name, email, phone
@@ -267,11 +298,13 @@ SnacksAPI.setBaseUrl(url)
 - `createdAt`, `updatedAt` - Timestamps
 
 **Enumerations:**
+
 - `OrderStatus` - Order states
 - `PaymentStatus` - Payment states
 - `PaymentMethod` - Payment methods (bank_transfer, mobile_money, card, payfast)
 
 **Methods:**
+
 - `generateReferenceNumber()` - Create unique reference
 - `validate()` - Validate business rules
 - `canTransitionTo(newStatus)` - Check if status transition allowed
@@ -282,6 +315,7 @@ SnacksAPI.setBaseUrl(url)
 - `toJSON()` - Serialize to JSON
 
 **State Machine:**
+
 ```
 pending → confirmed → processing → shipped → delivered
   ↓                                            ↓
@@ -291,6 +325,7 @@ cancelled (from any state)            refunded (after paid)
 ---
 
 ### `backend/src/domain/repositories/index.js`
+
 **Type:** Repository Interfaces  
 **Architecture Layer:** Domain  
 **Purpose:** Define interfaces that repositories must implement
@@ -298,6 +333,7 @@ cancelled (from any state)            refunded (after paid)
 **Interfaces:**
 
 #### IProductRepository
+
 ```javascript
 findById(id)              // Get product by ID
 findAll(options)          // Get all products with filters
@@ -308,6 +344,7 @@ delete(id)                // Delete product
 ```
 
 #### IOrderRepository
+
 ```javascript
 create(order)                      // Create new order
 findById(id)                       // Get order by ID
@@ -323,6 +360,7 @@ updatePaymentStatus(id, status)    // Update payment status
 ---
 
 ### `backend/src/application/use-cases/products/GetProducts.js`
+
 **Type:** Use Case (Business Process)  
 **Architecture Layer:** Application  
 **Purpose:** Handle the business logic of retrieving products
@@ -330,28 +368,34 @@ updatePaymentStatus(id, status)    // Update payment status
 **Classes:**
 
 #### GetProductsUseCase
+
 **Purpose:** Get all products with optional filtering
 
 **Constructor:**
+
 ```javascript
 new GetProductsUseCase(productRepository)
 ```
 
 **Method:**
+
 ```javascript
 async execute(options = {})
 ```
 
 **Options:**
+
 - `category` - Filter by category
 - `activeOnly` - Show only active products (default: true)
 
 **Returns:** Array of Product entities
 
 #### GetProductByIdUseCase
+
 **Purpose:** Get single product by ID
 
 **Method:**
+
 ```javascript
 async execute(productId)
 ```
@@ -363,6 +407,7 @@ async execute(productId)
 ---
 
 ### `backend/src/application/use-cases/orders/OrderUseCases.js`
+
 **Type:** Use Cases (Business Processes)  
 **Architecture Layer:** Application  
 **Purpose:** Handle order-related business logic
@@ -370,21 +415,25 @@ async execute(productId)
 **Classes:**
 
 #### CreateOrderUseCase
+
 **CRITICAL SECURITY CLASS**
 
 **Purpose:** Create new order with server-side validation
 
 **Constructor:**
+
 ```javascript
 new CreateOrderUseCase(orderRepository, productRepository)
 ```
 
 **Method:**
+
 ```javascript
 async execute(orderData)
 ```
 
 **Validation Process:**
+
 1. **Security Check**: Recalculate item prices from server database
 2. **Verify Products**: Check each product exists and is active
 3. **Validate Quantities**: Check 1-50 range
@@ -402,9 +451,11 @@ Never trusts client-submitted prices. Always looks up prices from server databas
 ```
 
 **Helper Method:**
+
 ```javascript
 async validateAndCalculateItems(clientItems)
 ```
+
 - Loops through each item
 - Gets product from server
 - Validates availability
@@ -412,18 +463,22 @@ async validateAndCalculateItems(clientItems)
 - Returns validated items
 
 #### GetOrderUseCase
+
 **Purpose:** Retrieve order information
 
 **Methods:**
+
 ```javascript
 async execute(id)                          // Get by ID
 async executeByReference(referenceNumber)  // Track by reference
 ```
 
 #### UpdateOrderStatusUseCase
+
 **Purpose:** Update order status with state machine validation
 
 **Method:**
+
 ```javascript
 async execute(orderId, newStatus)
 ```
@@ -431,9 +486,11 @@ async execute(orderId, newStatus)
 **Validates:** Status transition is allowed before updating
 
 #### UpdatePaymentStatusUseCase
+
 **Purpose:** Update payment status with validation
 
 **Method:**
+
 ```javascript
 async execute(orderId, newPaymentStatus)
 ```
@@ -441,6 +498,7 @@ async execute(orderId, newPaymentStatus)
 ---
 
 ### `backend/src/infrastructure/database/connection.js`
+
 **Type:** Database Configuration  
 **Architecture Layer:** Infrastructure  
 **Purpose:** Initialize and manage SQLite database connection
@@ -448,7 +506,9 @@ async execute(orderId, newPaymentStatus)
 **Key Functions:**
 
 #### initDatabase(databasePath)
+
 **Purpose:** Initialize database connection and create tables
+
 - Creates data directory if needed
 - Loads existing database or creates new one
 - Enables foreign keys
@@ -456,11 +516,13 @@ async execute(orderId, newPaymentStatus)
 - Saves database to disk
 
 #### createTables()
+
 **Purpose:** Create database schema
 
 **Tables:**
 
 ##### products
+
 ```sql
 CREATE TABLE products (
     id TEXT PRIMARY KEY,
@@ -482,6 +544,7 @@ CREATE INDEX idx_products_is_active ON products(is_active);
 ```
 
 ##### orders
+
 ```sql
 CREATE TABLE orders (
     id TEXT PRIMARY KEY,
@@ -507,6 +570,7 @@ CREATE INDEX idx_orders_payment_status ON orders(payment_status);
 ```
 
 #### prepare(sql)
+
 **Purpose:** Abstract sql.js prepare syntax
 
 **Why:** sql.js API differs from better-sqlite3. This wrapper normalizes the interface.
@@ -518,9 +582,11 @@ const result = stmt.getAsObject([id]);
 ```
 
 #### saveDatabase()
+
 **Purpose:** Serialize in-memory database to disk
 
 **When Called:**
+
 - After initial setup
 - After creating products
 - After creating/updating orders
@@ -529,11 +595,13 @@ const result = stmt.getAsObject([id]);
 ---
 
 ### `backend/src/infrastructure/database/seed.js`
+
 **Type:** Data Seeder  
 **Architecture Layer:** Infrastructure  
 **Purpose:** Create initial product data in database
 
 **Data Seeded:**
+
 1. **Starter Snack Pack** (R250.00)
    - Category: starter
    - Items: 2x Fruity Rainbow Bites, 2x Crunchy Caramel Bites, etc.
@@ -550,6 +618,7 @@ const result = stmt.getAsObject([id]);
    - Badge: "Best Value"
 
 **Usage:**
+
 ```bash
 npm run seed
 ```
@@ -557,11 +626,13 @@ npm run seed
 ---
 
 ### `backend/src/infrastructure/repositories/ProductRepository.js`
+
 **Type:** Repository Implementation  
 **Architecture Layer:** Infrastructure  
 **Purpose:** Implement IProductRepository for SQLite
 
 **Methods:**
+
 - `findById(id)` - Get product by ID
 - `findAll(options)` - Get all products with optional filtering
 - `findByCategory(category)` - Get products in category
@@ -570,6 +641,7 @@ npm run seed
 - `delete(id)` - Delete product
 
 **Implementation Details:**
+
 - Uses sql.js Database instance
 - Converts database rows to Product entities
 - Handles JSON serialization for nested data
@@ -578,11 +650,13 @@ npm run seed
 ---
 
 ### `backend/src/infrastructure/repositories/OrderRepository.js`
+
 **Type:** Repository Implementation  
 **Architecture Layer:** Infrastructure  
 **Purpose:** Implement IOrderRepository for SQLite
 
 **Methods:**
+
 - `create(order)` - Save new order
 - `findById(id)` - Get order by ID
 - `findByReferenceNumber(refNumber)` - Lookup by reference
@@ -592,6 +666,7 @@ npm run seed
 - `updatePaymentStatus(id, status)` - Update payment status
 
 **Special Features:**
+
 - Generates reference numbers
 - Stores JSON data (customer details, items, address)
 - Tracks timestamps
@@ -600,16 +675,19 @@ npm run seed
 ---
 
 ### `backend/src/infrastructure/logging/logger.js`
+
 **Type:** Logging Configuration  
 **Architecture Layer:** Infrastructure  
 **Purpose:** Set up Winston logger for application
 
 **Configuration:**
+
 - **Console Transport**: Log to terminal (development)
 - **File Transport**: Log to `./logs/combined.log` (all levels)
 - **Error File Transport**: Log to `./logs/error.log` (errors only)
 
 **Usage:**
+
 ```javascript
 const { logger } = require('./logging/logger');
 
@@ -627,6 +705,7 @@ logger.debug('Database query', { query: sql });
 ```
 
 **Log Format:**
+
 ```
 2026-02-04 21:36:31 [INFO] Server started { "port": 3000 }
 ```
@@ -634,6 +713,7 @@ logger.debug('Database query', { query: sql });
 ---
 
 ### `backend/src/presentation/controllers/ProductController.js`
+
 **Type:** Controller (Request Handler)  
 **Architecture Layer:** Presentation  
 **Purpose:** Handle HTTP requests for product endpoints
@@ -641,9 +721,11 @@ logger.debug('Database query', { query: sql });
 **Methods:**
 
 #### getAll(req, res, next)
+
 **Endpoint:** `GET /api/v1/products`
 
 **Process:**
+
 1. Get query filters from request
 2. Create GetProductsUseCase instance
 3. Execute use case
@@ -651,6 +733,7 @@ logger.debug('Database query', { query: sql });
 5. Send JSON response
 
 **Response:**
+
 ```json
 {
     "success": true,
@@ -660,9 +743,11 @@ logger.debug('Database query', { query: sql });
 ```
 
 #### getById(req, res, next)
+
 **Endpoint:** `GET /api/v1/products/:id`
 
 **Process:**
+
 1. Get ID from URL parameter
 2. Create GetProductByIdUseCase instance
 3. Execute use case
@@ -672,6 +757,7 @@ logger.debug('Database query', { query: sql });
 ---
 
 ### `backend/src/presentation/controllers/OrderController.js`
+
 **Type:** Controller (Request Handler)  
 **Architecture Layer:** Presentation  
 **Purpose:** Handle HTTP requests for order endpoints
@@ -679,9 +765,11 @@ logger.debug('Database query', { query: sql });
 **Methods:**
 
 #### create(req, res, next)
+
 **Endpoint:** `POST /api/v1/orders`
 
 **Process:**
+
 1. Extract order data from request body
 2. Log order attempt
 3. Create CreateOrderUseCase instance
@@ -690,6 +778,7 @@ logger.debug('Database query', { query: sql });
 6. Return 201 Created response
 
 **Request Body:**
+
 ```json
 {
     "customerDetails": {
@@ -715,36 +804,44 @@ logger.debug('Database query', { query: sql });
 ```
 
 #### getById(req, res, next)
+
 **Endpoint:** `GET /api/v1/orders/:id`
 
 **Process:**
+
 1. Get ID from URL
 2. Retrieve order from repository
 3. Return 404 if not found
 4. Send order data
 
 #### getByReference(req, res, next)
+
 **Endpoint:** `GET /api/v1/orders/reference/:refNumber`
 
 **Process:**
+
 1. Get reference number from URL
 2. Look up order by reference
 3. Return 404 if not found
 4. Send order data
 
 #### updateStatus(req, res, next)
+
 **Endpoint:** `PATCH /api/v1/orders/:id/status`
 
 **Process:**
+
 1. Validate new status
 2. Create UpdateOrderStatusUseCase
 3. Execute (validates state transition)
 4. Return updated order
 
 #### updatePayment(req, res, next)
+
 **Endpoint:** `PATCH /api/v1/orders/:id/payment`
 
 **Process:**
+
 1. Validate payment status
 2. Create UpdatePaymentStatusUseCase
 3. Execute
@@ -753,6 +850,7 @@ logger.debug('Database query', { query: sql });
 ---
 
 ### `backend/src/presentation/middleware/validators.js`
+
 **Type:** Input Validators  
 **Architecture Layer:** Presentation  
 **Purpose:** Validate incoming request data using express-validator
@@ -760,7 +858,9 @@ logger.debug('Database query', { query: sql });
 **Validator Chains:**
 
 #### createOrderValidators
+
 Validates POST /api/v1/orders request:
+
 - Customer first/last names (required, string)
 - Email (required, valid email)
 - Phone (required, 10+ chars)
@@ -774,16 +874,21 @@ Validates POST /api/v1/orders request:
 - Payment method (required, valid method)
 
 #### updateOrderStatusValidators
+
 Validates PATCH /api/v1/orders/:id/status:
+
 - Status parameter (required)
 - Valid status value
 
 #### updatePaymentStatusValidators
+
 Validates PATCH /api/v1/orders/:id/payment:
+
 - Payment status (required)
 - Valid payment status value
 
 **Usage:**
+
 ```javascript
 router.post('/orders',
     createOrderValidators,
@@ -795,6 +900,7 @@ router.post('/orders',
 ---
 
 ### `backend/src/presentation/middleware/errorHandler.js`
+
 **Type:** Error Handler  
 **Architecture Layer:** Presentation  
 **Purpose:** Centralized error handling and response formatting
@@ -802,6 +908,7 @@ router.post('/orders',
 **ApiError Class**
 
 Custom error class for API errors:
+
 ```javascript
 class ApiError extends Error {
     constructor(statusCode, message, details = null)
@@ -809,6 +916,7 @@ class ApiError extends Error {
 ```
 
 **Factory Methods:**
+
 - `ApiError.badRequest(message)` - 400
 - `ApiError.unauthorized(message)` - 401
 - `ApiError.forbidden(message)` - 403
@@ -819,17 +927,20 @@ class ApiError extends Error {
 **Error Handler Middleware**
 
 Global error handler middleware:
+
 ```javascript
 const errorHandler = (err, req, res, next) => { ... }
 ```
 
 **Process:**
+
 1. Log error for debugging
 2. Check if operational error
 3. Format response based on error type
 4. Send consistent JSON error response
 
 **Response Format:**
+
 ```json
 {
     "success": false,
@@ -841,22 +952,26 @@ const errorHandler = (err, req, res, next) => { ... }
 ---
 
 ### `backend/src/presentation/routes/productRoutes.js`
+
 **Type:** Route Definitions  
 **Architecture Layer:** Presentation  
 **Purpose:** Define product API endpoints
 
 **Routes:**
+
 - `GET /products` - Get all products
 - `GET /products/:id` - Get product by ID
 
 ---
 
 ### `backend/src/presentation/routes/orderRoutes.js`
+
 **Type:** Route Definitions  
 **Architecture Layer:** Presentation  
 **Purpose:** Define order API endpoints
 
 **Routes:**
+
 - `POST /orders` - Create new order
 - `GET /orders/:id` - Get order by ID
 - `GET /orders/reference/:refNumber` - Get order by reference
@@ -866,14 +981,17 @@ const errorHandler = (err, req, res, next) => { ... }
 ---
 
 ### `backend/src/presentation/routes/healthRoutes.js`
+
 **Type:** Route Definitions  
 **Architecture Layer:** Presentation  
 **Purpose:** Define health check endpoint
 
 **Routes:**
+
 - `GET /health` - Check API health
 
 **Response:**
+
 ```json
 {
     "success": true,
@@ -886,16 +1004,19 @@ const errorHandler = (err, req, res, next) => { ... }
 ---
 
 ### `backend/package.json`
+
 **Type:** Configuration  
 **Purpose:** Node.js project configuration and dependencies
 
 **Key Scripts:**
+
 - `npm start` - Run production server
 - `npm run dev` - Run with auto-reload (nodemon)
 - `npm run seed` - Seed database with initial data
 - `npm test` - Run tests
 
 **Dependencies:**
+
 - express - Web framework
 - sql.js - SQLite database
 - cors - CORS middleware
@@ -907,15 +1028,18 @@ const errorHandler = (err, req, res, next) => { ... }
 - dotenv - Environment variables
 
 **Dev Dependencies:**
+
 - nodemon - Auto-reload on file changes
 
 ---
 
 ### `backend/.env`
+
 **Type:** Configuration  
 **Purpose:** Environment variables for development
 
 **Variables:**
+
 ```
 PORT=3000                                    # Server port
 NODE_ENV=development                         # Environment
@@ -930,6 +1054,7 @@ PAYFAST_MERCHANT_KEY=xxxxx                  # PayFast merchant key
 ---
 
 ### `backend/.env.example`
+
 **Type:** Configuration Template  
 **Purpose:** Template showing all environment variables
 
@@ -938,10 +1063,12 @@ Usage: Copy to `.env` and fill in values
 ---
 
 ### `backend/.gitignore`
+
 **Type:** Git Configuration  
 **Purpose:** Specify files to exclude from version control
 
 **Files Ignored:**
+
 - node_modules/ - Dependencies
 - .env - Secrets
 - data/ - Database file
@@ -951,10 +1078,12 @@ Usage: Copy to `.env` and fill in values
 ---
 
 ### `backend/tests/`
+
 **Type:** Test Files  
 **Purpose:** Automated tests for entities and API
 
 **Structure:**
+
 ```
 tests/
 ├── domain/
@@ -965,6 +1094,7 @@ tests/
 ```
 
 **Test Content:**
+
 - Entity validation
 - Business rule enforcement
 - API endpoint functionality
@@ -1054,6 +1184,7 @@ Response to Client
 ## 📋 Key Files Checklist
 
 ### Must Have ✅
+
 - `backend/src/index.js` - Server entry point
 - `backend/src/domain/entities/` - Business entities
 - `backend/src/application/use-cases/` - Business logic
@@ -1067,6 +1198,7 @@ Response to Client
 - `package.json` - Dependencies
 
 ### Documentation ✅
+
 - `COMPLETE_README.md` - Main documentation
 - `COMPREHENSIVE_CODE_GUIDE.md` - Code comments
 - `backend/README.md` - Backend docs
